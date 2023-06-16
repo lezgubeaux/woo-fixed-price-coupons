@@ -20,7 +20,8 @@
  * @subpackage Woo_Fixed_Price_Coupons/public
  * @author     Vladimir Eric <vladimir@framework.tech>
  */
-class Woo_Fixed_Price_Coupons_Public {
+class Woo_Fixed_Price_Coupons_Public
+{
 
 	/**
 	 * The ID of this plugin.
@@ -47,11 +48,11 @@ class Woo_Fixed_Price_Coupons_Public {
 	 * @param      string    $plugin_name       The name of the plugin.
 	 * @param      string    $version    The version of this plugin.
 	 */
-	public function __construct( $plugin_name, $version ) {
+	public function __construct($plugin_name, $version)
+	{
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
-
 	}
 
 	/**
@@ -59,7 +60,8 @@ class Woo_Fixed_Price_Coupons_Public {
 	 *
 	 * @since    1.0.0
 	 */
-	public function enqueue_styles() {
+	public function enqueue_styles()
+	{
 
 		/**
 		 * This function is provided for demonstration purposes only.
@@ -73,8 +75,7 @@ class Woo_Fixed_Price_Coupons_Public {
 		 * class.
 		 */
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/woo-fixed-price-coupons-public.css', array(), $this->version, 'all' );
-
+		wp_enqueue_style($this->plugin_name, plugin_dir_url(__FILE__) . 'css/woo-fixed-price-coupons-public.css', array(), $this->version, 'all');
 	}
 
 	/**
@@ -82,7 +83,8 @@ class Woo_Fixed_Price_Coupons_Public {
 	 *
 	 * @since    1.0.0
 	 */
-	public function enqueue_scripts() {
+	public function enqueue_scripts()
+	{
 
 		/**
 		 * This function is provided for demonstration purposes only.
@@ -96,8 +98,79 @@ class Woo_Fixed_Price_Coupons_Public {
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/woo-fixed-price-coupons-public.js', array( 'jquery' ), $this->version, false );
-
+		wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/woo-fixed-price-coupons-public.js', array('jquery'), $this->version, false);
 	}
 
+	/**
+	 * Coupon with a "main currency" - the calculation.
+	 * # If any 'Multicurrency' found (none or one expected) - re-calculate base (Euro) or other currency values - from the main one, at the current exchange rate
+	 */
+	// find main currency and its value
+	// convert to currently chosen currency
+	public function get_coupon_current_value($coupon_code)
+	{
+		// get all details of a coupon by its code
+		$coupon_meta = new CouponMeta($coupon_code);
+
+		// log
+		$this->test_output("Multicurrency: " . print_r($coupon_meta->meta, true));
+
+		// find_main_currency()
+		$main_currency = $coupon_meta->meta;
+		if (empty($main_currency)) {
+			// if none - return (the coupon has only the plain base currency (Euro) value)
+			return;
+		}
+
+		// if current currency == main currency - no change needed
+		$current_currency = get_woocommerce_currency();
+		if ($main_currency[1] === $current_currency) {
+			return;
+		}
+
+		// convert_coupon_value to current currency, based on the coupon's main currency amount;
+		$value = $this->convert_coupon_value($main_currency[0], $main_currency[1]);
+
+		// update displayed amount on the checkout page
+
+		// not really needed
+		return $value;
+	}
+	// convert the value
+	public function convert_coupon_value($value, $currency)
+	{
+		// get current currency
+		// get rate of $currency
+		$rate = apply_filters('wc_aelia_cs_convert', 1, 'USD', 'EUR');
+
+		// convert the value
+
+		return $value;
+	}
+
+	/**
+	 * various tests (outputting to Checkout page)
+	 */
+
+	// only for Eric
+	public function check_if_right_user_logged_in()
+	{
+		$user = wp_get_current_user();
+		if ($user->user_login == 'vladimir@framework.tech') {
+			add_action('woocommerce_after_checkout_form', array($this, 'test_output'));
+		}
+	}
+
+	// output some test content
+	public function test_output($content = '')
+	{
+		if (is_object($content)) {
+			$content = '';
+		}
+		$text = '<h4>Test Output:</h4>' . $content;
+
+		// 
+
+		echo '<div class="alert">' . $text . '</div>';
+	}
 }

@@ -2,3 +2,9 @@
  * All of the CSS for your public-facing functionality should be
  * included in this file.
  */
+
+ .alert{
+    background-color: palegoldenrod;
+    border:5px solid red;
+    padding:50px;
+ }

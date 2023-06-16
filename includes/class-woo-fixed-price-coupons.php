@@ -27,7 +27,8 @@
  * @subpackage Woo_Fixed_Price_Coupons/includes
  * @author     Vladimir Eric <vladimir@framework.tech>
  */
-class Woo_Fixed_Price_Coupons {
+class Woo_Fixed_Price_Coupons
+{
 
 	/**
 	 * The loader that's responsible for maintaining and registering all hooks that power
@@ -66,11 +67,12 @@ class Woo_Fixed_Price_Coupons {
 	 *
 	 * @since    1.0.0
 	 */
-	public function __construct() {
-		if ( defined( 'WOO_FIXED_PRICE_COUPONS_VERSION' ) ) {
+	public function __construct()
+	{
+		if (defined('WOO_FIXED_PRICE_COUPONS_VERSION')) {
 			$this->version = WOO_FIXED_PRICE_COUPONS_VERSION;
 		} else {
-			$this->version = '1.0.0';
+			$this->version = '1.1.0';
 		}
 		$this->plugin_name = 'woo-fixed-price-coupons';
 
@@ -78,7 +80,6 @@ class Woo_Fixed_Price_Coupons {
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
-
 	}
 
 	/**
@@ -97,33 +98,38 @@ class Woo_Fixed_Price_Coupons {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function load_dependencies() {
+	private function load_dependencies()
+	{
 
 		/**
 		 * The class responsible for orchestrating the actions and filters of the
 		 * core plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-woo-fixed-price-coupons-loader.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-woo-fixed-price-coupons-loader.php';
 
 		/**
 		 * The class responsible for defining internationalization functionality
 		 * of the plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-woo-fixed-price-coupons-i18n.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-woo-fixed-price-coupons-i18n.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-woo-fixed-price-coupons-admin.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'admin/class-woo-fixed-price-coupons-admin.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the public-facing
 		 * side of the site.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-woo-fixed-price-coupons-public.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-woo-fixed-price-coupons-public.php';
+
+		/**
+		 * The class defines Woo Coupon Meta data (multicurrency values).
+		 */
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-woo-fixed-price-coupons-coupon-meta.php';
 
 		$this->loader = new Woo_Fixed_Price_Coupons_Loader();
-
 	}
 
 	/**
@@ -135,12 +141,12 @@ class Woo_Fixed_Price_Coupons {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function set_locale() {
+	private function set_locale()
+	{
 
 		$plugin_i18n = new Woo_Fixed_Price_Coupons_i18n();
 
-		$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
-
+		$this->loader->add_action('plugins_loaded', $plugin_i18n, 'load_plugin_textdomain');
 	}
 
 	/**
@@ -150,13 +156,13 @@ class Woo_Fixed_Price_Coupons {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function define_admin_hooks() {
+	private function define_admin_hooks()
+	{
 
-		$plugin_admin = new Woo_Fixed_Price_Coupons_Admin( $this->get_plugin_name(), $this->get_version() );
+		$plugin_admin = new Woo_Fixed_Price_Coupons_Admin($this->get_plugin_name(), $this->get_version());
 
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
-
+		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_styles');
+		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
 	}
 
 	/**
@@ -166,13 +172,23 @@ class Woo_Fixed_Price_Coupons {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function define_public_hooks() {
+	private function define_public_hooks()
+	{
 
-		$plugin_public = new Woo_Fixed_Price_Coupons_Public( $this->get_plugin_name(), $this->get_version() );
+		$plugin_public = new Woo_Fixed_Price_Coupons_Public($this->get_plugin_name(), $this->get_version());
 
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+		$this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_styles');
+		$this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_scripts');
 
+		/**
+		 * test outputs (on the checkout page) - ONLY for Eric
+		 */
+		$this->loader->add_action('plugins_loaded', $plugin_public, 'check_if_right_user_logged_in');
+
+		/**
+		 * get coupon main-value (in desired currency)
+		 */
+		$this->loader->add_action('woocommerce_applied_coupon', $plugin_public, 'get_coupon_current_value', 10, 1);
 	}
 
 	/**
@@ -180,7 +196,8 @@ class Woo_Fixed_Price_Coupons {
 	 *
 	 * @since    1.0.0
 	 */
-	public function run() {
+	public function run()
+	{
 		$this->loader->run();
 	}
 
@@ -191,7 +208,8 @@ class Woo_Fixed_Price_Coupons {
 	 * @since     1.0.0
 	 * @return    string    The name of the plugin.
 	 */
-	public function get_plugin_name() {
+	public function get_plugin_name()
+	{
 		return $this->plugin_name;
 	}
 
@@ -201,7 +219,8 @@ class Woo_Fixed_Price_Coupons {
 	 * @since     1.0.0
 	 * @return    Woo_Fixed_Price_Coupons_Loader    Orchestrates the hooks of the plugin.
 	 */
-	public function get_loader() {
+	public function get_loader()
+	{
 		return $this->loader;
 	}
 
@@ -211,8 +230,8 @@ class Woo_Fixed_Price_Coupons {
 	 * @since     1.0.0
 	 * @return    string    The version number of the plugin.
 	 */
-	public function get_version() {
+	public function get_version()
+	{
 		return $this->version;
 	}
-
 }
