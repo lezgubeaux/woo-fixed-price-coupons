@@ -28,7 +28,7 @@
 
 global $woocommerce;
 
-class CouponMeta extends WC_Coupon
+class Woo_Fixed_Price_Coupons_CouponMeta extends WC_Coupon
 {
     public $meta = array();
     public $meta_val;

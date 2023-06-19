@@ -87,8 +87,6 @@ class Woo_Fixed_Price_Coupons_Public
 	{
 
 		/**
-		 * This function is provided for demonstration purposes only.
-		 *
 		 * An instance of this class should be passed to the run() function
 		 * defined in Woo_Fixed_Price_Coupons_Loader as all of the hooks are defined
 		 * in that particular class.
@@ -110,22 +108,24 @@ class Woo_Fixed_Price_Coupons_Public
 	public function get_coupon_current_value($coupon_code)
 	{
 		// get all details of a coupon by its code
-		$coupon_meta = new CouponMeta($coupon_code);
+		$coupon_meta = new Woo_Fixed_Price_Coupons_CouponMeta($coupon_code);
 
 		// log
-		$this->test_output("Multicurrency: " . print_r($coupon_meta->meta, true));
+		// $this->test_output("Multicurrency: " . print_r($coupon_meta->meta, true));
 
 		// find_main_currency()
 		$main_currency = $coupon_meta->meta;
+		ve_debug_log("Main curr: " . print_r($main_currency, true), "fixed_coupon");
 		if (empty($main_currency)) {
 			// if none - return (the coupon has only the plain base currency (Euro) value)
-			return;
+			return $coupon_meta->get_amount();
 		}
 
-		// if current currency == main currency - no change needed
+		// if current currency == main currency - no change of the amount is needed
 		$current_currency = get_woocommerce_currency();
+		ve_debug_log("Current_currency: " . $current_currency, "fixed_coupon");
 		if ($main_currency[1] === $current_currency) {
-			return;
+			return $main_currency[0];
 		}
 
 		// convert_coupon_value to current currency, based on the coupon's main currency amount;
@@ -136,16 +136,32 @@ class Woo_Fixed_Price_Coupons_Public
 		// not really needed
 		return $value;
 	}
+
 	// convert the value
 	public function convert_coupon_value($value, $currency)
 	{
+		ve_debug_log("Step 2: the coupon amounts are recalculated by exch. rates", "fixed_coupon");
+
 		// get current currency
-		// get rate of $currency
-		$rate = apply_filters('wc_aelia_cs_convert', 1, 'USD', 'EUR');
+		// get rate of $currency in EUR
+		// 												amount	from 		to
+		$amount = apply_filters('wc_aelia_cs_convert', $value, $currency, 'EUR');
+
+		ve_debug_log("converted to eur: " . $amount, "fixed_coupon");
+
+		// get current woo currency
+		$current_currency = get_woocommerce_currency();
+		// if EUR, no conversion
+		if ($current_currency == 'EUR') {
+			return $amount;
+		}
 
 		// convert the value
+		$amount = apply_filters('wc_aelia_cs_convert', $amount, 'EUR', $current_currency);
 
-		return $value;
+		ve_debug_log("converted to " . $amount . " " . $current_currency, "fixed_coupon");
+
+		return $amount;
 	}
 
 	/**
@@ -157,8 +173,17 @@ class Woo_Fixed_Price_Coupons_Public
 	{
 		$user = wp_get_current_user();
 		if ($user->user_login == 'vladimir@framework.tech') {
-			add_action('woocommerce_after_checkout_form', array($this, 'test_output'));
+			if (is_checkout()) {
+				add_action('the_content', array($this, 'list_all_hooks'));
+			}
 		}
+	}
+
+	public function list_all_hooks($content)
+	{
+		$content .= list_hooks();
+
+		return $content;
 	}
 
 	// output some test content
@@ -172,5 +197,30 @@ class Woo_Fixed_Price_Coupons_Public
 		// 
 
 		echo '<div class="alert">' . $text . '</div>';
+	}
+
+	/**
+	 * get coupon and alter it before it is applied (but is already submitted to Checkout)
+	 */
+	public function custom_coupon_discount_amount($discount, $discounting_amount, $cart_item, $single, $coupon)
+	{
+
+		ve_debug_log("Step 1: intercept calculating discount", "fixed_coupon");
+
+		// Check if the coupon belongs to Aelia
+		// # skipped for now (wasnt't really working, and not necessary) #
+		/* if (class_exists('Aelia\WC\AeliaCurrencySwitcher') && $coupon->get_meta('aelia_valid_currencies')) {
+
+			// altering the discount amount
+			$discount *= 1.1;
+		} */
+
+		$coupon_code = $coupon->get_code();
+		$discount = $this->get_coupon_current_value($coupon_code);
+
+		ve_debug_log("Coupon to apply  - " . $discount . " xxxxxxxxxxxxxxxxxxxxxxx", "fixed_coupon");
+
+
+		return $discount;
 	}
 }

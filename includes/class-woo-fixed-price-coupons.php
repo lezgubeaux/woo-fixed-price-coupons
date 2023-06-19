@@ -188,7 +188,20 @@ class Woo_Fixed_Price_Coupons
 		/**
 		 * get coupon main-value (in desired currency)
 		 */
-		$this->loader->add_action('woocommerce_applied_coupon', $plugin_public, 'get_coupon_current_value', 10, 1);
+		// $this->loader->add_action('woocommerce_applied_coupon', $plugin_public, 'get_coupon_current_value', 10, 1);
+
+		/**
+		 * get coupon and alter it before it is applied (but is already submitted to Checkout)
+		 */
+		$this->loader->add_filter('woocommerce_coupon_get_discount_amount', $plugin_public, 'custom_coupon_discount_amount', 10, 5);
+
+		/**
+		 * remove coupon amount from the Subtotal
+		 * (needed to hide the fact that we will switch the amount to a value that will work in WC calculation - the way it is requested /as a sales price, not coupon/)
+		 */
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// https://stackoverflow.com/questions/65447443/change-remove-link-text-for-woocommerce-coupon-on-checkout-page
+
 	}
 
 	/**
