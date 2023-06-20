@@ -172,16 +172,17 @@ class Woo_Fixed_Price_Coupons_Public
 	public function check_if_right_user_logged_in()
 	{
 		$user = wp_get_current_user();
+		ve_debug_log("User: " . $user->user_login, "hooks");
 		if ($user->user_login == 'vladimir@framework.tech') {
-			if (is_checkout()) {
-				add_action('the_content', array($this, 'list_all_hooks'));
-			}
+			// if (is_checkout()) {
+			// add_action('the_content', array($this, 'list_all_hooks'));
+			// }
 		}
 	}
 
 	public function list_all_hooks($content)
 	{
-		$content .= list_hooks();
+		$content .= ve_list_hooks();
 
 		return $content;
 	}
@@ -202,7 +203,7 @@ class Woo_Fixed_Price_Coupons_Public
 	/**
 	 * get coupon and alter it before it is applied (but is already submitted to Checkout)
 	 */
-	public function custom_coupon_discount_amount($discount, $discounting_amount, $cart_item, $single, $coupon)
+	public function custom_coupon_discount_amount($discount = 0, $discounting_amount = '', $cart_item = '', $single = '', $coupon)
 	{
 
 		ve_debug_log("Step 1: intercept calculating discount", "fixed_coupon");
@@ -215,12 +216,40 @@ class Woo_Fixed_Price_Coupons_Public
 			$discount *= 1.1;
 		} */
 
-		$coupon_code = $coupon->get_code();
+		if (is_object($coupon)) {
+			$coupon_code = $coupon->get_code();
+		} else {
+			$coupon_code = $coupon;
+		}
 		$discount = $this->get_coupon_current_value($coupon_code);
 
 		ve_debug_log("Coupon to apply  - " . $discount . " xxxxxxxxxxxxxxxxxxxxxxx", "fixed_coupon");
 
-
 		return $discount;
+	}
+
+	/**
+	 * display custom calculated coupon within subtotal
+	 */
+	function display_coupon_value_to_subtotal($coupon_html, $coupon, $discount_amount_html)
+	{
+
+		$discount_amount_html = $this->custom_coupon_discount_amount(0, 0, '', '', $coupon);
+		$coupon_html = $discount_amount_html . ' <a href="' . esc_url(add_query_arg('remove_coupon', rawurlencode($coupon->get_code()), defined('WOOCOMMERCE_CHECKOUT') ? wc_get_checkout_url() : wc_get_cart_url())) . '" class="woocommerce-remove-coupon" data-coupon="' . esc_attr($coupon->get_code()) . '">' . __('[Remove]', 'woocommerce') . '</a>';
+
+		return $coupon_html;
+	}
+
+	/**
+	 * display custom calculated coupon within subtotal
+	 */
+	function display_coupon_value_to_total($total, $cart)
+	{
+		$coupon = $cart->get_applied_coupons();
+		if (count($coupon) > 0) {
+			$total = $this->custom_coupon_discount_amount(0, 0, '', '', $coupon[0]);
+		}
+
+		return $total;
 	}
 }

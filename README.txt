@@ -67,6 +67,11 @@ directory take precedence. For example, `/assets/screenshot-1.png` would win ove
 
 == Changelog ==
 
+= 1.2 =
+all working as requested.
+The previous fixes are completely removed from -child files.
+The plugin works independently.
+
 = 1.1 =
 - functions (general steps)
 - test output function

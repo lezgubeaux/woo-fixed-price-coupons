@@ -72,7 +72,7 @@ class Woo_Fixed_Price_Coupons
 		if (defined('WOO_FIXED_PRICE_COUPONS_VERSION')) {
 			$this->version = WOO_FIXED_PRICE_COUPONS_VERSION;
 		} else {
-			$this->version = '1.1.0';
+			$this->version = '1.2.0';
 		}
 		$this->plugin_name = 'woo-fixed-price-coupons';
 
@@ -193,7 +193,18 @@ class Woo_Fixed_Price_Coupons
 		/**
 		 * get coupon and alter it before it is applied (but is already submitted to Checkout)
 		 */
-		$this->loader->add_filter('woocommerce_coupon_get_discount_amount', $plugin_public, 'custom_coupon_discount_amount', 10, 5);
+		// $this->loader->add_filter('woocommerce_coupon_get_discount_amount', $plugin_public, 'custom_coupon_discount_amount', 10, 5);
+
+		/**
+		 * display custom calculated coupon within subtotal
+		 */
+		$this->loader->add_filter('woocommerce_cart_totals_coupon_html', $plugin_public, 'display_coupon_value_to_subtotal', 10, 3);
+
+		/**
+		 * display custom calculated coupon within total
+		 */
+		$this->loader->add_filter('woocommerce_calculated_total', $plugin_public, 'display_coupon_value_to_total', 10, 2);
+
 
 		/**
 		 * remove coupon amount from the Subtotal
