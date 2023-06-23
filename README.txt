@@ -67,6 +67,10 @@ directory take precedence. For example, `/assets/screenshot-1.png` would win ove
 
 == Changelog ==
 
+= 1.2.1 =
+Euro-based coupon had a flow in calculation - now fixed.
+A few more log breakpoints added to ....log_fixed-coupon
+
 = 1.2 =
 all working as requested.
 The previous fixes are completely removed from -child files.

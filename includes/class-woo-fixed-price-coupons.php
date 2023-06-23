@@ -72,7 +72,7 @@ class Woo_Fixed_Price_Coupons
 		if (defined('WOO_FIXED_PRICE_COUPONS_VERSION')) {
 			$this->version = WOO_FIXED_PRICE_COUPONS_VERSION;
 		} else {
-			$this->version = '1.2.0';
+			$this->version = '1.2.1';
 		}
 		$this->plugin_name = 'woo-fixed-price-coupons';
 
