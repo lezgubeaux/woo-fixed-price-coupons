@@ -67,8 +67,14 @@ directory take precedence. For example, `/assets/screenshot-1.png` would win ove
 
 == Changelog ==
 
+= 1.3.0 =
+Works with either Aelia Currency Switcher or WPML Multicurrency (detecting which is active, and using proper function to get the exchange rate)
+
+Added: settings page
+A gap (exchange rate markup) is set per each currency. The saved option has a top priority over switch-currency plugin that is already in use (so the gap with them needs to be set to 0)
+
 = 1.2.1 =
-Euro-based coupon had a flow in calculation - now fixed.
+Euro-based coupon had a flaw in calculation - now fixed.
 A few more log breakpoints added to ....log_fixed-coupon
 
 = 1.2 =

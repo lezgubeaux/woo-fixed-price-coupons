@@ -200,7 +200,7 @@ class Woo_Fixed_Price_Coupons_Public
 
 	public function list_all_hooks($content)
 	{
-		$content .= ve_list_hooks();
+		// $content .= ve_list_hooks();
 
 		return $content;
 	}

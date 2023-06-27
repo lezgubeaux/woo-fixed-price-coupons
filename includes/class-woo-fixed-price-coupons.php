@@ -72,7 +72,7 @@ class Woo_Fixed_Price_Coupons
 		if (defined('WOO_FIXED_PRICE_COUPONS_VERSION')) {
 			$this->version = WOO_FIXED_PRICE_COUPONS_VERSION;
 		} else {
-			$this->version = '1.2.1';
+			$this->version = '1.3.0';
 		}
 		$this->plugin_name = 'woo-fixed-price-coupons';
 
@@ -161,8 +161,16 @@ class Woo_Fixed_Price_Coupons
 
 		$plugin_admin = new Woo_Fixed_Price_Coupons_Admin($this->get_plugin_name(), $this->get_version());
 
+		/** 
+		 * load assets
+		 */
 		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_styles');
 		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
+
+		/**
+		 * create admin menu
+		 */
+		$this->loader->add_action('admin_menu', $plugin_admin, 'fpc_add_settings_page');
 	}
 
 	/**

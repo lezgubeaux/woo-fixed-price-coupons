@@ -16,7 +16,7 @@
  * Plugin Name:       Woo Fixed-price coupons
  * Plugin URI:        https://woo-fixed-price-coupons.tech
  * Description:       Convert woo coupons' discount to fixed-price purchase. Relies on Aelia Currency Switcher for WooCommerce, including it's Rate Markup.
- * Version:           1.2.1
+ * Version:           1.3.0
  * Author:            Vladimir Eric
  * Author URI:        https://framework.tech
  * License:           GPL-2.0+
@@ -31,11 +31,32 @@ if (!defined('WPINC')) {
 }
 
 /**
+ * check which required plugins are active
+ */
+$plugins = apply_filters('active_plugins', get_option('active_plugins'));
+// Make sure WooCommerce is active
+if (!in_array('woocommerce/woocommerce.php', $plugins)) {
+	ve_debug_log("### ERROR ### WooCommerce is not active on this site! Woo Fixed Price Coupon plugin cannot work without WooCommerce!", "error");
+	return;
+}
+// check which currency exchange plugin is active
+const CURRENCY_EXCH = ''; // woocommerce-multilingual, woocommerce-aelia-currencyswitcher
+if (!in_array('woocommerce-multilingual/wpml-woocommerce.php', $plugins)) {
+
+	ve_debug_log("WooCommerce Multilingual & Multicurrency plugin found!", "fixed_coupon");
+	define(CURRENCY_EXCH, 'woocommerce-multilingual');
+} else if (!in_array('woocommerce-aelia-currencyswitcher/woocommerce-aelia-currencyswitcher.php', $plugins)) {
+
+	ve_debug_log("Aelia WooCommerce Currency Switcher plugin found!", "fixed_coupon");
+	define(CURRENCY_EXCH, 'woocommerce-aelia-currencyswitcher');
+}
+
+/**
  * Currently plugin version.
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define('WOO_FIXED_PRICE_COUPONS_VERSION', '1.2.1');
+define('WOO_FIXED_PRICE_COUPONS_VERSION', '1.3.0');
 
 /**
  * The code that runs during plugin activation.

@@ -20,7 +20,8 @@
  * @subpackage Woo_Fixed_Price_Coupons/admin
  * @author     Vladimir Eric <vladimir@framework.tech>
  */
-class Woo_Fixed_Price_Coupons_Admin {
+class Woo_Fixed_Price_Coupons_Admin
+{
 
 	/**
 	 * The ID of this plugin.
@@ -47,11 +48,11 @@ class Woo_Fixed_Price_Coupons_Admin {
 	 * @param      string    $plugin_name       The name of this plugin.
 	 * @param      string    $version    The version of this plugin.
 	 */
-	public function __construct( $plugin_name, $version ) {
+	public function __construct($plugin_name, $version)
+	{
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
-
 	}
 
 	/**
@@ -59,7 +60,8 @@ class Woo_Fixed_Price_Coupons_Admin {
 	 *
 	 * @since    1.0.0
 	 */
-	public function enqueue_styles() {
+	public function enqueue_styles()
+	{
 
 		/**
 		 * This function is provided for demonstration purposes only.
@@ -73,8 +75,7 @@ class Woo_Fixed_Price_Coupons_Admin {
 		 * class.
 		 */
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/woo-fixed-price-coupons-admin.css', array(), $this->version, 'all' );
-
+		wp_enqueue_style($this->plugin_name, plugin_dir_url(__FILE__) . 'css/woo-fixed-price-coupons-admin.css', array(), $this->version, 'all');
 	}
 
 	/**
@@ -82,7 +83,8 @@ class Woo_Fixed_Price_Coupons_Admin {
 	 *
 	 * @since    1.0.0
 	 */
-	public function enqueue_scripts() {
+	public function enqueue_scripts()
+	{
 
 		/**
 		 * This function is provided for demonstration purposes only.
@@ -96,8 +98,37 @@ class Woo_Fixed_Price_Coupons_Admin {
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/woo-fixed-price-coupons-admin.js', array( 'jquery' ), $this->version, false );
-
+		wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/woo-fixed-price-coupons-admin.js', array('jquery'), $this->version, false);
 	}
 
+	/**
+	 * create admin menu
+	 */
+	public function fpc_add_settings_page()
+	{
+		add_submenu_page(
+			'woocommerce',	// parent_slug
+			__('Fixed Price Coupon', 'woo-fixed-price-coupons'), // page_title
+			__('Fixed Price Coupon', 'woo-fixed-price-coupons'), // menu_title
+			'manage_woocommerce', //capability
+			'woo-fixed-price-coupons',	// sub-menu slug
+			array(
+				$this,
+				'fpc_render_plugin_settings_page', //callback 
+			)
+			// 7 // submenu order in the menu item
+		);
+	}
+
+	/**
+	 * admin menu page
+	 */
+	public function fpc_render_plugin_settings_page()
+	{
+		echo '<pre>';
+		var_dump(apply_filters('active_plugins', get_option('active_plugins')));
+		echo '</pre>';
+
+		return;
+	}
 }
