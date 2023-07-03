@@ -115,11 +115,15 @@ class Woo_Fixed_Price_Coupons_Public
 
 		// find_main_currency()
 		$main_currency = $coupon_meta->meta;
-		ve_debug_log("Main curr: " . print_r($main_currency, true), "fixed_coupon");
-		if (empty($main_currency)) {
-			// if none - return (the coupon has only the plain base currency (Euro) value)
-			return $coupon_meta->get_amount();
+		if (strlen($main_currency[0]) < 2) {
+			// if none - the coupon has only the plain base currency (Euro) value
+			// this is already converted by Aelia Currency
+			$value = $coupon_meta->get_amount();
+			ve_debug_log("Euro-based coupon needs no custom conversion: " . print_r($value, true), "fixed_coupon");
+
+			return $value;
 		}
+		ve_debug_log("Main curr: " . print_r($main_currency, true), "fixed_coupon");
 
 		// if current currency == main currency - no change of the amount is needed
 		$current_currency = get_woocommerce_currency();
@@ -142,24 +146,39 @@ class Woo_Fixed_Price_Coupons_Public
 	{
 		ve_debug_log("Step 2: the coupon amounts are recalculated by exch. rates", "fixed_coupon");
 
-		// get current currency
-		// get rate of $currency in EUR
-		// 												amount	from 		to
-		$amount = apply_filters('wc_aelia_cs_convert', $value, $currency, 'EUR');
-
-		ve_debug_log("converted to eur: " . $amount, "fixed_coupon");
+		// conversion is done in 2 steps: first - to EUR, second - to current_curreny
 
 		// get current woo currency
 		$current_currency = get_woocommerce_currency();
-		// if EUR, no conversion
-		if ($current_currency == 'EUR') {
+		ve_debug_log("Current Woo currency is: " . $current_currency, "fixed_coupon");
+
+		// if EUR, no first conversion
+		if ($currency == 'EUR') {
+
+			// do only the second conversion
+			// 												amount	from 		to
+			$amount = apply_filters('wc_aelia_cs_convert', $value, 'EUR', $current_currency);
+
+			ve_debug_log("Eur coupon converted to " . $amount . " " . $current_currency, "fixed_coupon");
+
 			return $amount;
 		}
 
-		// convert the value
+		// first conversion: to EUR
+		$amount = apply_filters('wc_aelia_cs_convert', $value, $currency, 'EUR');
+		ve_debug_log("firstly, converted to EUR: " . $amount, "fixed_coupon");
+
+		// if current is EUR, no second conversion
+		if ($current_currency == 'EUR') {
+
+			return $amount;
+			ve_debug_log("EUR is the current woo currency. Done! ", "fixed_coupon");
+		}
+
+		// second conversion: EUR to current currency
 		$amount = apply_filters('wc_aelia_cs_convert', $amount, 'EUR', $current_currency);
 
-		ve_debug_log("converted to " . $amount . " " . $current_currency, "fixed_coupon");
+		ve_debug_log("second conversion to " . $amount . " " . $current_currency, "fixed_coupon");
 
 		return $amount;
 	}
@@ -172,7 +191,6 @@ class Woo_Fixed_Price_Coupons_Public
 	public function check_if_right_user_logged_in()
 	{
 		$user = wp_get_current_user();
-		ve_debug_log("User: " . $user->user_login, "hooks");
 		if ($user->user_login == 'vladimir@framework.tech') {
 			// if (is_checkout()) {
 			// add_action('the_content', array($this, 'list_all_hooks'));

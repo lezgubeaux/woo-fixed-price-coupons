@@ -67,6 +67,17 @@ directory take precedence. For example, `/assets/screenshot-1.png` would win ove
 
 == Changelog ==
 
+= 1.2.3 =
+Custom calculation of the coupon discount completely removed. The desired total achieved by creating an mirro-coupon, hidden from users, who's ammount is calculated to give out the desired total, but within the standard Woo coupon calculation.
+This way, when an Order is sent to CRM or re-calculated in the Dashboard - the Total remains as wanted.
+
+= 1.2.2 =
+ve_debug_log function (normally located in an mu-plugin) added in-the-plugin (to prevent errors, if mu-plugin not present)
+
+= 1.2.1 =
+Euro-based coupon had a flaw in calculation - now fixed.
+A few more log breakpoints added to ....log_fixed-coupon
+
 = 1.2 =
 all working as requested.
 The previous fixes are completely removed from -child files.

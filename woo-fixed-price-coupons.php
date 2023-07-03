@@ -16,7 +16,7 @@
  * Plugin Name:       Woo Fixed-price coupons
  * Plugin URI:        https://woo-fixed-price-coupons.tech
  * Description:       Convert woo coupons' discount to fixed-price purchase. Relies on Aelia Currency Switcher for WooCommerce, including it's Rate Markup.
- * Version:           1.2.0
+ * Version:           1.2.3
  * Author:            Vladimir Eric
  * Author URI:        https://framework.tech
  * License:           GPL-2.0+
@@ -31,11 +31,31 @@ if (!defined('WPINC')) {
 }
 
 /**
+ * Debugging - If ve_debug mu-plugin is not installed, add function to output debug
+ */
+if (!function_exists('ve_debug_log')) {
+	function ve_debug_log($message, $title = '', $new = false)
+	{
+		$filename = WP_CONTENT_DIR . '/woo_cprlm_l_debug-' . $title . '.log';
+
+		// empty the log if requested
+		if ($new && file_exists($filename)) {
+			wp_delete_file($filename);
+		}
+
+		error_log("\r\n" . date('m/d/Y h:i:s a', time()) . " v" . CPRLM_LITE_VERSION . "\r\n" .
+			$message . "\r\n", 3, $filename);
+
+		return;
+	}
+}
+
+/**
  * Currently plugin version.
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define('WOO_FIXED_PRICE_COUPONS_VERSION', '1.2.0');
+define('WOO_FIXED_PRICE_COUPONS_VERSION', '1.2.3');
 
 /**
  * The code that runs during plugin activation.
