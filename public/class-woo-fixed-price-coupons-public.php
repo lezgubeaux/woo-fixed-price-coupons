@@ -249,10 +249,13 @@ class Woo_Fixed_Price_Coupons_Public
 	/**
 	 * display custom calculated coupon within subtotal
 	 */
-	function display_coupon_value_to_subtotal($coupon_html, $coupon, $discount_amount_html)
+	public function hide_coupon_value_to_subtotal($coupon_html, $coupon, $discount_amount_html)
 	{
 
-		$discount_amount_html = $this->custom_coupon_discount_amount(0, 0, '', '', $coupon);
+		// $discount_amount_html = $this->custom_coupon_discount_amount(0, 0, '', '', $coupon);
+
+		// hide the hidden coupon ammount, as its value is not user-friendly
+		$discount_amount_html = 'XXX ';
 		$coupon_html = $discount_amount_html . ' <a href="' . esc_url(add_query_arg('remove_coupon', rawurlencode($coupon->get_code()), defined('WOOCOMMERCE_CHECKOUT') ? wc_get_checkout_url() : wc_get_cart_url())) . '" class="woocommerce-remove-coupon" data-coupon="' . esc_attr($coupon->get_code()) . '">' . __('[Remove]', 'woocommerce') . '</a>';
 
 		return $coupon_html;
@@ -261,7 +264,7 @@ class Woo_Fixed_Price_Coupons_Public
 	/**
 	 * display custom calculated coupon within subtotal
 	 */
-	function display_coupon_value_to_total($total, $cart)
+	/* public function display_coupon_value_to_total($total, $cart)
 	{
 		$coupon = $cart->get_applied_coupons();
 		if (count($coupon) > 0) {
@@ -269,5 +272,111 @@ class Woo_Fixed_Price_Coupons_Public
 		}
 
 		return $total;
+	} */
+
+	/**
+	 * when a coupon applied, replace coupon with a hidden coupon,
+	 * that will ensure the Total - as requested
+	 */
+	public function fwt_fixed_coupon($coupon_code)
+	{
+		// current coupon =============================================
+		$c = new WC_Coupon($coupon_code);
+		ve_debug_log("received coupon from _applied " . $coupon_code, "hidd_coupon");
+		if (!is_object($c)) {
+
+			ve_debug_log("attempt to apply a non-existing coupon " . $coupon_code, "hidd_coupon");
+			return;
+		}
+		if (substr($coupon_code, 0, 7) == 'fwt_ve_') {
+
+			// this is my hidden coupon, already processed. get out!
+			return;
+		}
+		$coupon_amount = $c->get_amount();
+
+		// remove curr coupon discount from the card
+		WC()->cart->remove_coupon($coupon_code);
+
+		// create hidden coupon =======================================
+		$coupon = new WC_Coupon();
+		$new_code = 'fwt_ve_' . time();
+		$coupon->set_code($new_code);
+		$coupon->set_description('Hidden coupon. See the total!');
+		// General tab ===
+		// discount type can be 'fixed_cart', 'percent' or 'fixed_product', defaults to 'fixed_cart'
+		$coupon->set_discount_type('fixed_cart');
+		// discount 
+		$new_amount = WC()->cart->total - $coupon_amount;
+		ve_debug_log("amount " . $new_amount, "hidd_coupon");
+		$coupon->set_amount($new_amount);
+		// allow free shipping
+		// $coupon->set_free_shipping(true);
+		// coupon expiry date
+		// $coupon->set_date_expires('31-12-2322');
+		// Usage Restriction
+		// minimum spend
+		// $coupon->set_minimum_amount(1000);
+		// maximum spend
+		// $coupon->set_maximum_amount(50000);
+		// individual use only
+		$coupon->set_individual_use(true);
+		// exclude sale items
+		// $coupon->set_exclude_sale_items(true);
+		// products
+		// $coupon->set_product_ids(array(132));
+		// exclude products
+		// $coupon->set_excluded_product_ids(array(15, 16));
+		// categories
+		// $coupon->set_product_categories(array(17));
+		// exclude categories
+		// $coupon->set_excluded_product_categories(array(19, 20));
+		// allowed emails
+		// $coupon->set_email_restrictions(
+		// 	array(
+		// 		'no-reply@rudrastyh.com',
+		// 		'kate@rudrastyh.com',
+		// 	)
+		// );
+		// Usage limit tab ===
+		// usage limit per coupon
+		// $coupon->set_usage_limit(100);
+		// limit usage to X items
+		// $coupon->set_limit_usage_to_x_items(10);
+		// usage limit per user
+		// $coupon->set_usage_limit_per_user(2);
+
+		$coupon->save();
+
+		$new_id = $coupon->get_id();
+
+		// apply the hidden coupon
+		if (!WC()->cart->has_discount($new_code)) {
+			WC()->cart->apply_coupon($new_code);
+		} else {
+			return;
+		}
+
+		ve_debug_log("removed coupon: " . $coupon_code . " " . $coupon_amount, "hidd_coupon");
+
+		return;
+	}
+
+	/**
+	 * prevents outputting "coupon applied" for hidden coupons. works on Checkout page
+	 */
+	public function remove_hidd_coupon_applied($msg, $msg_code)
+	{
+		if (is_checkout() || wp_doing_ajax() || WC()->cart->get_cart_contents_count() > 0) {
+			$coupons = WC()->cart->get_applied_coupons();
+			// ve_debug_log("coup on apply hook: " . print_r($coupons, true));
+			foreach ($coupons as $coupon) {
+				if (substr($coupon, 0, 7) == 'fwt_ve_') {
+					// do not display woo msg "coupon applied" - for a hidden coupon
+					return "";
+				}
+			}
+		}
+		return $msg;
 	}
 }
