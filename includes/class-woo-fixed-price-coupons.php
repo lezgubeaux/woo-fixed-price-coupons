@@ -186,6 +186,28 @@ class Woo_Fixed_Price_Coupons
 		$this->loader->add_action('plugins_loaded', $plugin_public, 'check_if_right_user_logged_in');
 
 		/**
+		 * display custom calculated coupon within subtotal
+		 */
+		$this->loader->add_filter('woocommerce_cart_totals_coupon_html', $plugin_public, 'hide_coupon_value_to_subtotal', 10, 3);
+
+		/**
+		 * when a coupon applied, replace coupon with a hidden coupon,
+		 * that will ensure the Total - as requested.
+		 * This is the CORE FUNCTION of the plugin
+		 */
+		$this->loader->add_action('woocommerce_applied_coupon', $plugin_public, 'fwt_fixed_coupon');
+
+		/**
+		 * do not output "coupon applied" for hidden coupons
+		 */
+		$this->loader->add_filter('woocommerce_coupon_message', $plugin_public, 'remove_hidd_coupon_applied', 10, 2);
+
+		/**
+		 * delete the hidden coupon from DB, once it is applied to Cart
+		 */
+		$this->loader->add_filter('woocommerce_checkout_order_processed', $plugin_public, 'delete_hidden_coupon');
+
+		/**
 		 * get coupon main-value (in desired currency)
 		 */
 		// $this->loader->add_action('woocommerce_applied_coupon', $plugin_public, 'get_coupon_current_value', 10, 1);
@@ -196,25 +218,9 @@ class Woo_Fixed_Price_Coupons
 		// $this->loader->add_filter('woocommerce_coupon_get_discount_amount', $plugin_public, 'custom_coupon_discount_amount', 10, 5);
 
 		/**
-		 * display custom calculated coupon within subtotal
-		 */
-		$this->loader->add_filter('woocommerce_cart_totals_coupon_html', $plugin_public, 'hide_coupon_value_to_subtotal', 10, 3);
-
-		/**
 		 * display custom calculated coupon within total
 		 */
 		// $this->loader->add_filter('woocommerce_calculated_total', $plugin_public, 'display_coupon_value_to_total', 10, 2);
-
-		/**
-		 * when a coupon applied, replace coupon with a hidden coupon,
-		 * that will ensure the Total - as requested
-		 */
-		$this->loader->add_action('woocommerce_applied_coupon', $plugin_public, 'fwt_fixed_coupon');
-
-		/**
-		 * do not output "coupon applied" for hidden coupons
-		 */
-		$this->loader->add_filter('woocommerce_coupon_message', $plugin_public, 'remove_hidd_coupon_applied', 10, 2);
 
 
 		/**

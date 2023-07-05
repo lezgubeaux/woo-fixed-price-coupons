@@ -36,9 +36,11 @@ class Woo_Fixed_Price_Coupons_CouponMeta extends WC_Coupon
 
     public function __construct($coupon_code)
     {
-        parent::__construct($coupon_code); // get native 
-        $this->meta_all = $this->meta_data[0]->get_data("current_data");
-        $this->find_nonempty($this->meta_all['value']);
+        parent::__construct($coupon_code); // get native coupon class
+        if ($this->meta_data[0]) {
+            $this->meta_all = $this->meta_data[0]->get_data("current_data");
+            $this->find_nonempty($this->meta_all['value']);
+        }
     }
 
     private function find_nonempty($vals)
