@@ -205,17 +205,12 @@ class Woo_Fixed_Price_Coupons
 		/**
 		 * delete the hidden coupon from DB, once it is applied to Cart
 		 */
-		$this->loader->add_filter('woocommerce_checkout_order_processed', $plugin_public, 'delete_hidden_coupon');
+		$this->loader->add_filter('woocommerce_checkout_order_processed', $plugin_public, 'delete_hidden_coupon', 10, 3);
 
 		/**
 		 * get coupon main-value (in desired currency)
 		 */
 		// $this->loader->add_action('woocommerce_applied_coupon', $plugin_public, 'get_coupon_current_value', 10, 1);
-
-		/**
-		 * get coupon and alter it before it is applied (but is already submitted to Checkout)
-		 */
-		// $this->loader->add_filter('woocommerce_coupon_get_discount_amount', $plugin_public, 'custom_coupon_discount_amount', 10, 5);
 
 		/**
 		 * display custom calculated coupon within total

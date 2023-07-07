@@ -39,14 +39,18 @@ class Woo_Fixed_Price_Coupons_CouponMeta extends WC_Coupon
         parent::__construct($coupon_code); // get native coupon class
         if ($this->meta_data[0]) {
             $this->meta_all = $this->meta_data[0]->get_data("current_data");
+            ve_debug_log("################### \r\n
+                Coupon meta " . $coupon_code . " " . $this->meta_all, "hidd_coupon_meta");
             $this->find_nonempty($this->meta_all['value']);
         }
     }
 
     private function find_nonempty($vals)
     {
-
         $this->meta = ['', ''];
+        if (!is_array($vals)) {
+            return;
+        }
 
         foreach ($vals as $key => $val) {
             if ($val['coupon_amount']) {
@@ -55,5 +59,6 @@ class Woo_Fixed_Price_Coupons_CouponMeta extends WC_Coupon
                 break;
             }
         }
+        return;
     }
 }
