@@ -36,11 +36,13 @@ class Woo_Fixed_Price_Coupons_CouponMeta extends WC_Coupon
 
     public function __construct($coupon_code)
     {
+        ve_debug_log("################### \r\n
+        Coupon Meta Class: " . $coupon_code, "hidd_coupon_meta");
+
         parent::__construct($coupon_code); // get native coupon class
         if ($this->meta_data[0]) {
             $this->meta_all = $this->meta_data[0]->get_data("current_data");
-            ve_debug_log("################### \r\n
-                Coupon meta " . $coupon_code . " " . $this->meta_all, "hidd_coupon_meta");
+            ve_debug_log(print_r($this->meta_all, true), "hidd_coupon_meta");
             $this->find_nonempty($this->meta_all['value']);
         }
     }
