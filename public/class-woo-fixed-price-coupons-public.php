@@ -173,29 +173,60 @@ class Woo_Fixed_Price_Coupons_Public
 		}
 		ve_debug_log("Current Woo currency is: " . $curr_to, "hidd_coupon");
 
-		if ($curr_to == 'EUR') {
-
-			// if EUR, no 1) conversion
-			// 												amount	from 		to
-			$amount = apply_filters('wc_aelia_cs_convert', $value, $curr_from, 'EUR');
-
-			ve_debug_log("Amount exchanged 
-				from " . $curr_from . "=" . $value .
-				" to " . $curr_to . "=" . $amount, "hidd_coupon");
-
-			return $amount;
-		}
-
-		// first conversion: to EUR
-		$amount = apply_filters('wc_aelia_cs_convert', $value, $curr_from, 'EUR');
-		ve_debug_log("firstly, exchanged to EUR: " . $amount, "hidd_coupon");
-
-		// second conversion: EUR to current currency
-		$amount = apply_filters('wc_aelia_cs_convert', $amount, 'EUR', $curr_to);
-
-		ve_debug_log("second conversion to " . $amount . " " . $curr_to, "hidd_coupon");
+		$amount = $this->exch_from_to($value, $curr_from, $curr_to);
 
 		return $amount;
+	}
+
+	/**
+	 * exchange rate
+	 */
+	public function exch_from_to($amount, $from, $to)
+	{
+		if (CURRENCY_EXCH == 'woocommerce-aelia-currencyswitcher') {
+
+			if ($to == 'EUR') {
+
+				// if EUR, no 1) conversion
+				// 												amount	from 		to
+				$res = apply_filters('wc_aelia_cs_convert', $amount, $from, 'EUR');
+
+				ve_debug_log("Amount exchanged 
+					from " . $from . "=" . $amount .
+					" to " . $to . "=" . $res, "hidd_coupon");
+
+				return $res;
+			}
+
+			// first conversion: to EUR
+			$res = apply_filters('wc_aelia_cs_convert', $amount, $from, 'EUR');
+			ve_debug_log("firstly, exchanged to EUR: " . $amount, "hidd_coupon");
+
+			// second conversion: EUR to current currency
+			$res = apply_filters('wc_aelia_cs_convert', $res, 'EUR', $to);
+			ve_debug_log("scondly, exchanged to: " . $to . " = " . $amount, "hidd_coupon");
+
+			return $res;
+		} else if (CURRENCY_EXCH == 'woocommerce-multilingual') {
+			// woocommerce-multilingual manages currency exchange rate
+			$wcml = new WCML_Multi_Currency;
+			$exch_rates = $wcml->get_exchange_rates();
+
+			ve_debug_log("WCML exch. rates: " . print_r($exch_rates, true), "exch_coupon");
+			// apply_filters( 'wcml_exchange_rates', $this->exchange_rates );
+
+			if ($from == 'EUR') {
+				// convert from EUR
+				return $amount * $exch_rates[$to];
+			} else if ($to == 'EUR') {
+				// convert to EUR
+				return $amount / $exch_rates[$from];
+			} else {
+				// exchange 2 non-EUR currencies
+				$res = $amount / $exch_rates[$from];
+				return $res * $exch_rates[$to];
+			}
+		}
 	}
 
 	/**

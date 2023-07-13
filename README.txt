@@ -67,9 +67,20 @@ directory take precedence. For example, `/assets/screenshot-1.png` would win ove
 
 == Changelog ==
 
+= 1.3.1 =
+"Aelia Currency Switcher or WPML Multicurrency" feature now works (up to WMPL exch. rate pull)
+
+= 1.3.0 =
+Works with either Aelia Currency Switcher or WPML Multicurrency (detecting which is active, and using proper function to get the exchange rate)
+
+Added: settings page
+A gap (exchange rate markup) is set per each currency. The saved option has a top priority over switch-currency plugin that is already in use (so the gap with them needs to be set to 0)
+
 = 1.2.3 =
 Custom calculation of the coupon discount completely removed. The desired total achieved by creating an mirror-coupon, hidden from users, who's ammount is calculated to give out the desired total, but within the standard Woo coupon calculation.
 This way, when an Order is sent to CRM or re-calculated in the Dashboard - the Total remains as wanted.
+
+All hooks related to forcing a change in the Cart (excepts for the coupon) - are removed now!
 
 = 1.2.2 =
 ve_debug_log function (normally located in an mu-plugin) added in-the-plugin (to prevent errors, if mu-plugin not present)
