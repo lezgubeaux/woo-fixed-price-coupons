@@ -120,6 +120,7 @@ class Woo_Fixed_Price_Coupons_Public
 			ve_debug_log("ERRROR !!! Attempt to apply a non-existing coupon " . $coupon_code, "hidd_coupon");
 			return;
 		}
+
 		ve_debug_log(print_r($c, true), "hidd_coupon_orig", 1);
 
 		// remove curr coupon discount from the card =======================================
@@ -127,7 +128,7 @@ class Woo_Fixed_Price_Coupons_Public
 		ve_debug_log("Step 0.1 = The originally saved coupon is de-applied! ", "hidd_coupon");
 
 		$price_curr = WC()->cart->total;
-		ve_debug_log("Total after ctandard coupon de-applied: " . $price_curr, "hidd_coupon");
+		ve_debug_log("Total after ctandard coupon de-applied: " . $price_curr . " orig am: " . $c->get_amount(), "hidd_coupon");
 		$coupon_id = $c->get_id();
 
 		$currency_curr = get_woocommerce_currency();
@@ -136,8 +137,9 @@ class Woo_Fixed_Price_Coupons_Public
 		$cloned = $this->clone_coupon_to_hidden($c, $coupon_id, $price_curr, $currency_curr);
 		$new_code = $cloned[0];
 		$new_amount = $cloned[1];
+		ve_debug_log("Clone returned: " . print_r($cloned, true), "hidd_coupon");
 
-		if ($new_code == 0) {
+		if ($new_code === 0) {
 			// clone did not succeed, as coupon not found!
 			return;
 		}
@@ -151,52 +153,13 @@ class Woo_Fixed_Price_Coupons_Public
 		}
 
 		ve_debug_log("Step 0.2 = hidden coupon applied: " . $new_code . " " . $new_amount, "hidd_coupon");
+
 		return;
 	}
 
 	/**
 	 * save the hidden coupon, and apply it to the cart
 	 */
-
-
-	/**
-	 * Returns coupon value in a current currency,  calculated from "main currency"
-	 */
-	/* public function get_coupon_current_value($coupon_code)
-	{
-		// get all details of a coupon by its code
-		$coupon = new Woo_Fixed_Price_Coupons_CouponMeta($coupon_code);
-		// currently chosen currency
-		$current_currency = get_woocommerce_currency();
-		ve_debug_log("Current_currency: " . $current_currency, "hidd_coupon");
-
-		// find_main_currency()
-		$main_currency = $coupon->meta; // multicurrency of a coupon is defined as meta
-		if (strlen($main_currency[0]) < 2) {
-			// if no Multicurrency value - the coupon has only the plain base currency (Euro) value
-			$value = $coupon->get_amount();
-
-			// if needed, conversion will be done by currency switch plugin
-			ve_debug_log("Main currency is EUR: " . print_r($value, true), "hidd_coupon");
-
-			return $value;
-		}
-
-		// a coupon with a main value set in multicurrency (not EUR)
-		ve_debug_log("Main currency: " . print_r($main_currency, true), "hidd_coupon");
-
-		// if current currency == main currency - no change of the amount is needed
-		if ($main_currency[1] === $current_currency) {
-			return $main_currency[0];
-		}
-
-		// exchange to current currency, 
-		// calculated from coupon's main currency amount
-		// 									value				from				to
-		$value = $this->exchange($main_currency[0], $main_currency[1]);
-
-		return $value;
-	} */
 
 	// exchange the value to any currency
 	public function exchange($value, $curr_from, $curr_to = '')
@@ -241,7 +204,6 @@ class Woo_Fixed_Price_Coupons_Public
 	// 							orig. coupon	c id		curr cart price	curr currency
 	public function clone_coupon_to_hidden($c, $coupon_id, $price_curr, $currency_curr)
 	{
-		// ve_debug_log(print_r($c, true), "c");
 
 		// Retrieve the existing coupon data
 		$existing_coupon = get_post($coupon_id);
@@ -274,29 +236,25 @@ class Woo_Fixed_Price_Coupons_Public
 
 		// Retrieve the coupon meta data
 		$coupon_meta = get_post_meta($coupon_id);
-		ve_debug_log(print_r($coupon_meta, true), "c");
 
 		// Update the coupon meta data for the new coupon
-		ve_debug_log("Adding meta from orig to hidden " . $new_coupon_id, "hidd_coupon");
+		ve_debug_log("Adding meta from orig to hidden " . $new_coupon_id . " orig am: " . $c->get_amount(), "hidd_coupon");
 
-		$has_multi = false;
 		foreach ($coupon_meta as $meta_key => $meta_values) {
 
 			foreach ($meta_values as $meta_value) {
 
-				$vals = unserialize($meta_value);
+				$vals = $meta_value;
 				ve_debug_log("for key: " . $meta_key . " meta_value: " . print_r($vals, true), "hidd_coupon");
 
 				if ($meta_key == '_coupon_currency_data') {
 
-					$has_multi = true;
 					$vals = unserialize($meta_value);
 
-					if ($c->meta[0]) {
+					if (strlen($c->meta[1]) == 3) {
 
 						// correct main value
 						$currency_main = $c->meta[1];
-						ve_debug_log("Meta val from orig coupon " . $vals, "hidd_coupon");
 
 						$amount_main = $c->meta[0];
 						// correct the main amount (to get custom calculated discount price)
@@ -310,50 +268,50 @@ class Woo_Fixed_Price_Coupons_Public
 
 						// set all Multicurrency values (corrected!)
 						// 									hidd id		main val	main currency 	vals
-						$vals = $this->define_coupon_meta($new_coupon_id, $amount_main, $c->meta[1], $vals);
+						$rvals = $this->define_coupon_meta($new_coupon_id, $amount_main, $c->meta[1], $vals);
 
-						ve_debug_log("Meta val from hidd coupon " . print_r($vals, true), "hidd_coupon");
+						ve_debug_log("Meta val from hidd coupon " . print_r($rvals, true), "hidd_coupon");
 					} else {
-						// if there is _coupon_currency_data my custom coupon MUST of have meta[] = ERROR!!!
-						ve_debug_log("Error: coupon with multicurrency data was not properly processed in my custom coupon class! Meta[] is missing!!!", "error_coupon");
 
-						return [0, ''];
+						// Hidd coupon with no custom multicurrency amount set - should not have multicurrency metas processed
+
+						ve_debug_log("NO meta val from hidd coupon - this is EUR-only coupon", "hidd_coupon");
 					}
+				} else {
+					$rvals = $vals;
 				}
 				// save each meta from original to cloned coupon
-				update_post_meta($new_coupon_id, $meta_key, $vals);
+				update_post_meta($new_coupon_id, $meta_key, $rvals);
 			}
-
-			/* 
-			if (!$has_multi) {
-				// if no Multicurrency amount set, use base-currency amount of the coupon
-				if ($currency_curr != 'EUR') {
-					$price_curr = $this->exchange($price_curr, $currency_curr, 'EUR');
-				}
-				$amount_main = $price_curr - $c->get_amount();
-				$amount_coup = $amount_main;
-			} else {
-				$amount_coup = $this->exchange($amount_main, $currency_curr, 'EUR');
-			}
-
-			$hidd_coupon = new Woo_Fixed_Price_Coupons_CouponMeta($new_code);
-			$hidd_coupon->set_amount($amount_coup); */
 		}
 
 		$hidd_coupon = new Woo_Fixed_Price_Coupons_CouponMeta($new_code);
-		ve_debug_log("hidd " . $hidd_coupon);
-		$amount_main = 100;
+
+		if (strlen($c->meta[1]) == 3) {
+			$amount_coup = $this->exchange($amount_main, $currency_main, 'EUR');
+		} else {
+			// if no Multicurrency amount set, use base-currency amount of the coupon
+
+			ve_debug_log("base amount for non-multicurrency coupon: " . $price_curr . " " . $c->get_amount(), "hidd_coupon");
+			$amount_main = $price_curr - $c->get_amount();
+			$amount_coup = $amount_main;
+
+			if ($currency_curr != 'EUR') {
+				$amount_coup = $this->exchange($amount_main, $currency_curr, 'EUR');
+			}
+		}
+
+		ve_debug_log("Coupon's custom base amount: " . $amount_coup . " orig am: " . $c->get_amount(), "hidd_coupon");
+		$hidd_coupon->set_amount($amount_coup);
 
 		// save & apply hidden coupon (with already corrected amounts)
 		$hidd_coupon->save();
-		ve_debug_log("Hidden coupon is saved! " . $new_code, "hidd_coupon");
+		ve_debug_log("Hidden coupon was saved! " . $new_code, "hidd_coupon");
 
 		ve_debug_log(print_r($hidd_coupon, true), "hidd_coupon_hidd", 1);
 
-		wp_die();
-
 		// return the coupon id with corrected main amount
-		$ret = [$new_coupon_id, $amount_main];
+		$ret = [$new_code, $amount_main];
 		return $ret;
 	}
 
@@ -382,7 +340,6 @@ class Woo_Fixed_Price_Coupons_Public
 	 */
 	public function define_coupon_meta($id, $amount_main, $currency_main, $vals)
 	{
-
 		/** $vals = coupon / meta / _coupon_currency_data / ['value']
 		 * Array
 		 * 			[USD] => Array

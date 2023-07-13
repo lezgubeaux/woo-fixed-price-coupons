@@ -68,7 +68,7 @@ directory take precedence. For example, `/assets/screenshot-1.png` would win ove
 == Changelog ==
 
 = 1.2.3 =
-Custom calculation of the coupon discount completely removed. The desired total achieved by creating an mirro-coupon, hidden from users, who's ammount is calculated to give out the desired total, but within the standard Woo coupon calculation.
+Custom calculation of the coupon discount completely removed. The desired total achieved by creating an mirror-coupon, hidden from users, who's ammount is calculated to give out the desired total, but within the standard Woo coupon calculation.
 This way, when an Order is sent to CRM or re-calculated in the Dashboard - the Total remains as wanted.
 
 = 1.2.2 =

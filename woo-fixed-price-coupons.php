@@ -61,12 +61,12 @@ if (!in_array('woocommerce/woocommerce.php', $plugins)) {
 	return;
 }
 // check which currency exchange plugin is active
-const CURRENCY_EXCH = ''; // woocommerce-multilingual, woocommerce-aelia-currencyswitcher
-// ve_debug_log("All plugins (from FPC): " . print_r($plugins, true), "fixed_coupon");
-if (in_array('woocommerce-multilingual/wpml-woocommerce.php', $plugins)) {
-	define(CURRENCY_EXCH, 'woocommerce-multilingual');
-} else if (in_array('woocommerce-aelia-currencyswitcher/woocommerce-aelia-currencyswitcher.php', $plugins)) {
-	define(CURRENCY_EXCH, 'woocommerce-aelia-currencyswitcher');
+if (in_array('woocommerce-aelia-currencyswitcher/woocommerce-aelia-currencyswitcher.php', $plugins)) {
+	define('CURRENCY_EXCH', 'woocommerce-aelia-currencyswitcher');
+} else if (in_array('woocommerce-multilingual/wpml-woocommerce.php', $plugins)) {
+	define('CURRENCY_EXCH', 'woocommerce-multilingual');
+} else {
+	define('CURRENCY_EXCH', '');
 }
 
 /**
