@@ -204,7 +204,7 @@ class Woo_Fixed_Price_Coupons_Public
 
 			// second conversion: EUR to current currency
 			$res = apply_filters('wc_aelia_cs_convert', $res, 'EUR', $to);
-			ve_debug_log("scondly, exchanged to: " . $to . " = " . $amount, "hidd_coupon");
+			ve_debug_log("secondly, exchanged to: " . $to . " = " . $amount, "hidd_coupon");
 
 			return $res;
 		} else if (CURRENCY_EXCH == 'woocommerce-multilingual') {
