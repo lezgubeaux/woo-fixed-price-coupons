@@ -316,6 +316,7 @@ class Woo_Fixed_Price_Coupons_Public
 			}
 		}
 
+		$amount_main = $amount_coup = '';
 		$hidd_coupon = new Woo_Fixed_Price_Coupons_CouponMeta($new_code);
 
 		if (strlen($c->meta[1]) == 3) {
@@ -457,6 +458,12 @@ class Woo_Fixed_Price_Coupons_Public
 
 	public function list_all_hooks($content)
 	{
+		if (!function_exists('ve_list_hooks')) {
+			ve_debug_log("WARNING: the function ve_list_hooks is not defined!", "error_coupon");
+
+			return;
+		}
+
 		$content .= ve_list_hooks();
 
 		return $content;

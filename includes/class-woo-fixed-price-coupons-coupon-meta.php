@@ -30,7 +30,7 @@ global $woocommerce;
 
 class Woo_Fixed_Price_Coupons_CouponMeta extends WC_Coupon
 {
-    public $meta = array();
+    public $meta;
     public $meta_val;
     public $meta_all;
 
@@ -40,7 +40,8 @@ class Woo_Fixed_Price_Coupons_CouponMeta extends WC_Coupon
         Coupon Meta Class: " . $coupon_code, "hidd_coupon_meta");
 
         parent::__construct($coupon_code); // get native coupon class
-        if ($this->meta_data[0]) {
+        $this->meta = ['', ''];
+        if (isset($this->meta_data[0])) {
             $this->meta_all = $this->meta_data[0]->get_data("current_data");
             ve_debug_log(print_r($this->meta_all, true), "hidd_coupon_meta");
             $this->find_nonempty($this->meta_all['value']);
@@ -49,7 +50,6 @@ class Woo_Fixed_Price_Coupons_CouponMeta extends WC_Coupon
 
     private function find_nonempty($vals)
     {
-        $this->meta = ['', ''];
         if (!is_array($vals)) {
             return;
         }

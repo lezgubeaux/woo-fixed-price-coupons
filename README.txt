@@ -67,6 +67,12 @@ directory take precedence. For example, `/assets/screenshot-1.png` would win ove
 
 == Changelog ==
 
+= 1.3.3 =
+Fixed some bugs shown on a different installation (that does not use Aelia Currency Switcher to add multicurrency value to a coupon)
+
+= 1.3.2 =
+Custom exchange rate gap started. It uses any given amount and currency code to add predefined gap and return the amount with the gap included
+
 = 1.3.1 =
 "Aelia Currency Switcher or WPML Multicurrency" feature now works (up to WMPL exch. rate pull)
 

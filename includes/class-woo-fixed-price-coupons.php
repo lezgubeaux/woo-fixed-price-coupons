@@ -72,7 +72,7 @@ class Woo_Fixed_Price_Coupons
 		if (defined('WOO_FIXED_PRICE_COUPONS_VERSION')) {
 			$this->version = WOO_FIXED_PRICE_COUPONS_VERSION;
 		} else {
-			$this->version = '1.2.3';
+			$this->version = '1.3.3';
 		}
 		$this->plugin_name = 'woo-fixed-price-coupons';
 
@@ -125,9 +125,14 @@ class Woo_Fixed_Price_Coupons
 		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-woo-fixed-price-coupons-public.php';
 
 		/**
-		 * The class defines Woo Coupon Meta data (multicurrency values).
+		 * The class defines Woo Coupon Meta data (multicurrency values of a coupon).
 		 */
 		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-woo-fixed-price-coupons-coupon-meta.php';
+
+		/**
+		 * on each currency exchange (per given currency and amount) get the custom gap, and apply it to the amount
+		 */
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-woo-fixed-price-coupons-exchange-gap.php';
 
 		$this->loader = new Woo_Fixed_Price_Coupons_Loader();
 	}
