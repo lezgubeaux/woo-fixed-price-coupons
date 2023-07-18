@@ -183,6 +183,8 @@ class Woo_Fixed_Price_Coupons_Public
 	 */
 	public function exch_from_to($amount, $from, $to)
 	{
+		$gap = new Woo_Fixed_Price_Coupons_ExchangeGap;
+
 		if (CURRENCY_EXCH == 'woocommerce-aelia-currencyswitcher') {
 
 			if ($to == 'EUR') {
@@ -190,6 +192,8 @@ class Woo_Fixed_Price_Coupons_Public
 				// if EUR, no 1) conversion
 				// 												amount	from 		to
 				$res = apply_filters('wc_aelia_cs_convert', $amount, $from, 'EUR');
+				// 					amount	currency
+				$res = $gap->apply_gap($res, $from);
 
 				ve_debug_log("Amount exchanged 
 					from " . $from . "=" . $amount .
@@ -200,10 +204,12 @@ class Woo_Fixed_Price_Coupons_Public
 
 			// first conversion: to EUR
 			$res = apply_filters('wc_aelia_cs_convert', $amount, $from, 'EUR');
+			$res = $gap->apply_gap($res, $from);
 			ve_debug_log("firstly, exchanged to EUR: " . $amount, "hidd_coupon");
 
 			// second conversion: EUR to current currency
 			$res = apply_filters('wc_aelia_cs_convert', $res, 'EUR', $to);
+			$res = $gap->apply_gap($res, $to);
 			ve_debug_log("secondly, exchanged to: " . $to . " = " . $amount, "hidd_coupon");
 
 			return $res;
@@ -217,14 +223,25 @@ class Woo_Fixed_Price_Coupons_Public
 
 			if ($from == 'EUR') {
 				// convert from EUR
-				return $amount * $exch_rates[$to];
+				$res = $amount * $exch_rates[$to];
+				$res = $gap->apply_gap($res, $to);
+
+				return $res;
 			} else if ($to == 'EUR') {
 				// convert to EUR
-				return $amount / $exch_rates[$from];
+				$res = $amount / $exch_rates[$from];
+				$res = $gap->apply_gap($res, $from);
+
+				return $res;
 			} else {
 				// exchange 2 non-EUR currencies
 				$res = $amount / $exch_rates[$from];
-				return $res * $exch_rates[$to];
+				$res = $gap->apply_gap($res, $from);
+
+				$res * $exch_rates[$to];
+				$res = $gap->apply_gap($res, $to);
+
+				return $res;
 			}
 		}
 	}
@@ -421,6 +438,23 @@ class Woo_Fixed_Price_Coupons_Public
 				} else {
 					ve_debug_log("Hidden coupon deleted after being applied. Id: " . $id, "hidd_coupon");
 				}
+			}
+		}
+		return;
+	}
+	public function delete_hidden_coupon_by_code($coupon_code)
+	{
+		if (substr($coupon_code, 0, 7) == 'fwt_ve_') {
+
+			ve_debug_log("Attempting to delete hidden coupon: " . $coupon_code, "hidd_coupon");
+
+			$id = wc_get_coupon_id_by_code($coupon_code);
+			$res = wp_delete_post($id);
+
+			if (is_wp_error($res)) {
+				ve_debug_log("ERROR - failed attempt to delete coupon with id: " . $id, "error_coupon");
+			} else {
+				ve_debug_log("Hidden coupon deleted after being applied. Id: " . $id, "hidd_coupon");
 			}
 		}
 		return;

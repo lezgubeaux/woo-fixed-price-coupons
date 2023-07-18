@@ -120,4 +120,4 @@ function run_woo_fixed_price_coupons()
 	$plugin = new Woo_Fixed_Price_Coupons();
 	$plugin->run();
 }
-add_action('woocommerce_loaded', 'run_woo_fixed_price_coupons');
+add_action('wp_loaded', 'run_woo_fixed_price_coupons');

@@ -26,18 +26,18 @@
  * Exchange rate custom gaps, per-currrency
  */
 
-class ExchangeGap
+class Woo_Fixed_Price_Coupons_ExchangeGap
 {
-    public $exch;
-    public $currencies; // array of codes of all active currencies in this WooCommerce
+    public $gap;
+    public $currency; // array of codes of all active currencies in this WooCommerce
 
-    public function __construct($coupon_code)
+    public function __construct()
     {
-        ve_debug_log("################### \r\n
-        Exchange rate custom gaps: " . $coupon_code, "gap_coupon_meta");
-
-        // get all active Woo currencies -> $currencies
+        // get all active Woo currencies -> $currency
         $this->active_woo_currencies();
+
+        // get all gaps -> $gap
+        $this->get_gaps();
     }
 
     /**
@@ -45,8 +45,11 @@ class ExchangeGap
      * returns: the amount, corrected by the particular currency gap
      * returns: false (if bad arguments were passed)
      */
-    public function apply_rate($amount, $curr)
+    public function apply_gap($amount, $curr)
     {
+        ve_debug_log("################### \r\n
+        Exchange rate custom gap: " . $amount . " of " . $curr, "gap_coupon_meta");
+
         // check if the $amount is positive float
         if (!is_float($amount) || $amount <= 0) {
 
@@ -55,15 +58,34 @@ class ExchangeGap
         }
 
         // check if currency is active in this Woo
-        if (!in_array($curr, $this->currencies)) {
+        if (!in_array($curr, $this->currency)) {
 
             ve_debug_log("WARNING: invalid \$currency: " . $curr, "error_coupon");
             return false;
         }
 
-        $value = $amount * $this->exch[$curr] / 100;
+        // increase the value by the particular currency gap
+        $value = $amount * ($this->gap[$curr] + 1);
 
         return $value;
+    }
+
+    /** 
+     * get all defined gaps for currency exchange
+     */
+    public function get_gaps()
+    {
+        // temporarily fixed amounts (will be derrived from settings page)
+
+        foreach ($this->currency as $val) {
+            if ($val == 'EUR') {
+                $this->gap[$val] = 0;
+            } else {
+                $this->gap[$val] = rand(1, 100) * .0001;
+            }
+        }
+
+        ve_debug_log("Custom exch gaps: " . print_r($this->gap, true), "gap_list");
     }
 
     /**
@@ -71,9 +93,24 @@ class ExchangeGap
      */
     public function active_woo_currencies()
     {
+        // get all WOO currencies
+        $all_curr = get_woocommerce_currencies();
 
-        // get all active Woo currencies -> $currencies
-        $this->currencies = '';
+        $active_curr = array();
+
+        // get all active Woo currencies -> $currency
+        foreach ($all_curr as $code => $curr) {
+            $res = apply_filters('wc_aelia_cs_convert', 9999, $code, 'EUR');
+
+            ve_debug_log("Creating active curr list " . $code . " " . $res, "gap_coupon");
+
+            if ($res != 9999) {
+                $active_curr[] = $code;
+            }
+        }
+
+        $this->currency = $active_curr;
+        ve_debug_log("Active curr: " . print_r($this->currency, true), "gap_list");
 
         return;
     }

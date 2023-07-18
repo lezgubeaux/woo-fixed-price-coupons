@@ -213,6 +213,11 @@ class Woo_Fixed_Price_Coupons
 		$this->loader->add_filter('woocommerce_checkout_order_processed', $plugin_public, 'delete_hidden_coupon', 10, 3);
 
 		/**
+		 * delete the hidden coupon from DB, when it is un-applied
+		 */
+		$this->loader->add_action("woocommerce_removed_coupon", $plugin_public, 'delete_hidden_coupon_by_code');
+
+		/**
 		 * get coupon main-value (in desired currency)
 		 */
 		// $this->loader->add_action('woocommerce_applied_coupon', $plugin_public, 'get_coupon_current_value', 10, 1);

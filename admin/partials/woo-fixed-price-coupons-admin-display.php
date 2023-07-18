@@ -14,3 +14,5 @@
 ?>
 
 <!-- This file should primarily consist of HTML with a little bit of PHP. -->
+<h1>Fixed Price Coupons</h1>
+This is the main admin menu page.
