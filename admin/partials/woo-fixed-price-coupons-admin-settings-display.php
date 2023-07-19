@@ -20,10 +20,11 @@
     <h2>Fixed Price Coupons - Settings</h2>
     <!--NEED THE settings_errors below so that the errors/success messages are shown after submission - wasn't working once we started using add_menu_page and stopped using add_options_page so needed this-->
     <?php settings_errors(); ?>
+    <em>Values must be in decimal numbers (1% = 0.01, 2.5% = 0.025)...</em>
     <form method="POST" action="options.php">
         <?php
-        settings_fields('plugin_name_general_settings');
-        do_settings_sections('plugin_name_general_settings');
+        settings_fields('woo_fpc_general_settings');
+        do_settings_sections('woo_fpc_general_settings');
         ?>
         <?php submit_button(); ?>
     </form>

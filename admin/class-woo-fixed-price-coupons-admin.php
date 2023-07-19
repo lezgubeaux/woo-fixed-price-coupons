@@ -123,7 +123,7 @@ class Woo_Fixed_Price_Coupons_Admin
 		// submenu item
 		add_submenu_page(
 			$this->plugin_name, // parent_slug
-			'Plugin Name Settings', // page_title
+			'Fixed Price Coupons - Settings', // page_title
 			'Settings', // menu_title
 			'administrator', // capability
 			$this->plugin_name . '-settings', // menu_slug
@@ -138,7 +138,7 @@ class Woo_Fixed_Price_Coupons_Admin
 	 */
 	public function displayPluginAdminDashboard()
 	{
-		require_once 'partials' . $this->plugin_name . '-admin-display.php';
+		require_once 'partials/' . $this->plugin_name . '-admin-display.php';
 	}
 
 	/**
@@ -195,30 +195,43 @@ class Woo_Fixed_Price_Coupons_Admin
 			'woo_fpc_general_settings'
 		);
 		unset($args);
-		$args = array(
-			'type'      => 'input',
-			'subtype'   => 'text',
-			'id'    => 'woo_fpc_example_setting',
-			'name'      => 'woo_fpc_example_setting',
-			'required' => 'true',
-			'get_options_list' => '',
-			'value_type' => 'normal',
-			'wp_data' => 'option'
-		);
-		add_settings_field(
-			'woo_fpc_example_setting',
-			'Example Setting',
-			array($this, 'woo_fpc_render_settings_field'),
-			'woo_fpc_general_settings',
-			'woo_fpc_general_section',
-			$args
-		);
 
+		// get active currencies
+		$exch_gap = new Woo_Fixed_Price_Coupons_ExchangeGap;
+		$curr = $exch_gap->currency;
 
-		register_setting(
-			'woo_fpc_general_settings',
-			'woo_fpc_example_setting'
-		);
+		foreach ($curr as $code) {
+			$subtype = 'number';
+			if ($code == 'EUR') {
+				$subtype = 'hidden';
+			}
+
+			$args = array(
+				'type'      => 'input',
+				'subtype'   => $subtype,
+				'min'	=> 0,
+				'max'	=> 0.5,
+				'step'	=> 0.001,
+				'id'    => 'woo_fpc_gap_' . $code,
+				'name'      => 'woo_fpc_gap_' . $code,
+				'required' => 'true',
+				'get_options_list' => '',
+				'value_type' => 'normal',
+				'wp_data' => 'option'
+			);
+			add_settings_field(
+				'woo_fpc_gap_' . $code,
+				$code . ": ",
+				array($this, 'woo_fpc_render_settings_field'),
+				'woo_fpc_general_settings',
+				'woo_fpc_general_section',
+				$args
+			);
+			register_setting(
+				'woo_fpc_general_settings',
+				'woo_fpc_gap_' . $code,
+			);
+		}
 	}
 
 	/**
@@ -247,7 +260,11 @@ class Woo_Fixed_Price_Coupons_Admin
 		'post_id' =>
 		*/
 		if ($args['wp_data'] == 'option') {
-			$wp_data_value = get_option($args['name']);
+			$val = get_option($args['name']);
+			if (!$val) {
+				$val = 0;
+			}
+			$wp_data_value = $val;
 		} elseif ($args['wp_data'] == 'post_meta') {
 			$wp_data_value = get_post_meta($args['post_id'], $args['name'], true);
 		}
@@ -271,7 +288,7 @@ class Woo_Fixed_Price_Coupons_Admin
 					/*<input required="required" '.$disabled.' type="number" step="any" id="'.$this->plugin_name.'_cost2" name="'.$this->plugin_name.'_cost2" value="' . esc_attr( $cost ) . '" size="25" /><input type="hidden" id="'.$this->plugin_name.'_cost" step="any" name="'.$this->plugin_name.'_cost" value="' . esc_attr( $cost ) . '" />*/
 				} else {
 					$checked = ($value) ? 'checked' : '';
-					echo '<input type="' . $args['subtype'] . '" id="' . $args['id'] . '" "' . $args['required'] . '" name="' . $args['name'] . '" size="40" value="1" ' . $checked . ' />';
+					echo '<input type="' . $args['subtype'] . '" id="' . $args['id'] . '" "' . $args['required'] . '" name="' . $args['name'] . '" size="5" value="1" ' . $checked . ' />';
 				}
 				break;
 			default:

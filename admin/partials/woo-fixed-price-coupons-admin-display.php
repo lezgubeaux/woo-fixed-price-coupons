@@ -15,4 +15,8 @@
 
 <!-- This file should primarily consist of HTML with a little bit of PHP. -->
 <h1>Fixed Price Coupons</h1>
-This is the main admin menu page.
+This plugin manages special type of coupons. Our coupons' amount is the same amount you will see in total (instead of being deducted from it).<br /><br />
+
+It is mandatory that your installation uses either of the two multicurrency plugins: Aelica Currency Switcher or WPML Multicurrency. The plugin will use the exchange rate set within either of these plugins.<br /><br />
+
+Exchange rate gap needs to be set within the <a href="<?= get_admin_url(); ?>admin.php?page=woo-fixed-price-coupons-settings"><strong>Settings Page<strong></a>. No gap should be set within Aelia or WPML multicurrency plugins!

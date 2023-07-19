@@ -47,8 +47,7 @@ class Woo_Fixed_Price_Coupons_ExchangeGap
      */
     public function apply_gap($amount, $curr)
     {
-        ve_debug_log("################### \r\n
-        Exchange rate custom gap: " . $amount . " of " . $curr, "gap_coupon_meta");
+        ve_debug_log("gap in: " . $amount . " of " . $curr, "gap_coupon_meta");
 
         // check if the $amount is positive float
         if (!is_float($amount) || $amount <= 0) {
@@ -66,8 +65,9 @@ class Woo_Fixed_Price_Coupons_ExchangeGap
 
         // increase the value by the particular currency gap
         $value = $amount * ($this->gap[$curr] + 1);
+        ve_debug_log("gap out: " . $value . " of " . $curr, "gap_coupon_meta");
 
-        return $value;
+        return round($value, 2);
     }
 
     /** 
@@ -75,14 +75,10 @@ class Woo_Fixed_Price_Coupons_ExchangeGap
      */
     public function get_gaps()
     {
-        // temporarily fixed amounts (will be derrived from settings page)
+        // get from saved options woo_fpc_gap_COD(e)
 
         foreach ($this->currency as $val) {
-            if ($val == 'EUR') {
-                $this->gap[$val] = 0;
-            } else {
-                $this->gap[$val] = rand(1, 100) * .0001;
-            }
+            $this->gap[$val] = get_option('woo_fpc_gap_' . $val, 0);
         }
 
         ve_debug_log("Custom exch gaps: " . print_r($this->gap, true), "gap_list");
@@ -96,7 +92,7 @@ class Woo_Fixed_Price_Coupons_ExchangeGap
         // get all WOO currencies
         $all_curr = get_woocommerce_currencies();
 
-        $active_curr = array();
+        $active_curr = ['EUR']; // base currency - other are added below
 
         // get all active Woo currencies -> $currency
         foreach ($all_curr as $code => $curr) {
