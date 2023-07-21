@@ -296,4 +296,22 @@ class Woo_Fixed_Price_Coupons_Admin
 				break;
 		}
 	}
+
+	/**
+	 * adding gap to exchanging product price
+	 */
+	public function add_gap($price)
+	{
+		$currency_curr = get_woocommerce_currency();
+		if ($currency_curr == 'EUR') {
+			return $price;
+		} else {
+			ve_debug_log("### adding gap to product price", "gap_coupon");
+
+			$gap = new Woo_Fixed_Price_Coupons_ExchangeGap;
+			$res = $gap->apply_gap($price, $currency_curr);
+
+			return $res;
+		}
+	}
 }

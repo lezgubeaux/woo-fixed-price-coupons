@@ -36,29 +36,44 @@ class Woo_Fixed_Price_Coupons_CouponMeta extends WC_Coupon
 
     public function __construct($coupon_code)
     {
-        ve_debug_log("################### \r\n
-        Coupon Meta Class: " . $coupon_code, "hidd_coupon_meta");
 
         parent::__construct($coupon_code); // get native coupon class
         $this->meta = ['', ''];
         if (isset($this->meta_data[0])) {
+
             $this->meta_all = $this->meta_data[0]->get_data("current_data");
-            ve_debug_log(print_r($this->meta_all, true), "hidd_coupon_meta");
-            $this->find_nonempty($this->meta_all['value']);
+
+            $id = $this->meta_all['id'];
+
+            $this->find_nonempty($this->meta_all['value'], $id);
         }
     }
 
-    private function find_nonempty($vals)
+    private function find_nonempty($vals, $id)
     {
-        if (!is_array($vals)) {
-            return;
-        }
 
-        foreach ($vals as $key => $val) {
-            if ($val['coupon_amount']) {
-                $this->meta[0] = $val['coupon_amount'];
-                $this->meta[1] = $key;
-                break;
+        // if no multicurrency value found, this is EUR-only coupon
+
+        if (is_array($vals)) {
+            // if any multicurrency value found, use it CODE as _main
+            foreach ($vals as $key => $val) {
+                if ($val['coupon_amount']) {
+                    ve_debug_log("** " . $id . " k/v " . $key . " " . $val['coupon_amount'], "coupon_metaCoup");
+                    $this->meta[0] = $val['coupon_amount'];
+                    $this->meta[1] = $key;
+
+                    break;
+                }
+            }
+            // if no multicurrency value found, this is EUR-only coupon
+            if (strlen($this->meta[1]) != 3) {
+
+                $coupon_amount = $this->data["amount"];
+
+                ve_debug_log("============ From couponMeta: id = " . $id . " coup: " . print_r($coupon_amount, true), "coupon_metaCoup");
+
+                $this->meta[0] = $coupon_amount;
+                $this->meta[1] = 'EUR';
             }
         }
         return;

@@ -116,6 +116,9 @@ require plugin_dir_path(__FILE__) . 'includes/class-woo-fixed-price-coupons.php'
  */
 function run_woo_fixed_price_coupons()
 {
+	// reset logs
+	ve_debug_log("@@@ using gap @@@", "gap_coupon", 1);
+	// ve_debug_log("@@@ on curr exchange, regenrate coupon amount @@@", "updated_coupon", 1);
 
 	$plugin = new Woo_Fixed_Price_Coupons();
 	$plugin->run();

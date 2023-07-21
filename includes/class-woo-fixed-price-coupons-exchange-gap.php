@@ -45,27 +45,27 @@ class Woo_Fixed_Price_Coupons_ExchangeGap
      * returns: the amount, corrected by the particular currency gap
      * returns: false (if bad arguments were passed)
      */
-    public function apply_gap($amount, $curr)
+    public function apply_gap($amount, $curr, $do_gap = 1)
     {
-        ve_debug_log("gap in: " . $amount . " of " . $curr, "gap_coupon_meta");
-
         // check if the $amount is positive float
-        if (!is_float($amount) || $amount <= 0) {
+        /*         if (!is_float($amount) || $amount <= 0) {
 
-            ve_debug_log("WARNING: invalid \$amount: " . $amount, "error_coupon");
+            ve_debug_log("WARNING: invalid \$amount: " . print_r($amount, true), "error_coupon");
             return false;
-        }
+        } */
 
         // check if currency is active in this Woo
         if (!in_array($curr, $this->currency)) {
 
-            ve_debug_log("WARNING: invalid \$currency: " . $curr, "error_coupon");
+            ve_debug_log("WARNING: invalid \$currency: " . print_r($curr, true), "error_coupon");
             return false;
         }
 
+        ve_debug_log("gap in: " . $amount . " of " . $curr, "gap_coupon");
+
         // increase the value by the particular currency gap
-        $value = $amount * ($this->gap[$curr] + 1);
-        ve_debug_log("gap out: " . $value . " of " . $curr, "gap_coupon_meta");
+        $value = $amount * (1 + $this->gap[$curr] * $do_gap);
+        ve_debug_log("gap out: " . $value . " of " . $curr, "gap_coupon");
 
         return round($value, 2);
     }
@@ -80,8 +80,6 @@ class Woo_Fixed_Price_Coupons_ExchangeGap
         foreach ($this->currency as $val) {
             $this->gap[$val] = get_option('woo_fpc_gap_' . $val, 0);
         }
-
-        ve_debug_log("Custom exch gaps: " . print_r($this->gap, true), "gap_list");
     }
 
     /**
@@ -94,19 +92,18 @@ class Woo_Fixed_Price_Coupons_ExchangeGap
 
         $active_curr = ['EUR']; // base currency - other are added below
 
+        /* temporarily disabled
         // get all active Woo currencies -> $currency
         foreach ($all_curr as $code => $curr) {
             $res = apply_filters('wc_aelia_cs_convert', 9999, $code, 'EUR');
 
-            ve_debug_log("Creating active curr list " . $code . " " . $res, "gap_coupon");
-
             if ($res != 9999) {
                 $active_curr[] = $code;
             }
-        }
+        } */
+        $active_curr = ['EUR', 'AUD', 'CAD', 'GBP', 'USD', 'ZAR'];
 
         $this->currency = $active_curr;
-        ve_debug_log("Active curr: " . print_r($this->currency, true), "gap_list");
 
         return;
     }

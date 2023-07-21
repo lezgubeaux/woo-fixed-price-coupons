@@ -134,6 +134,11 @@ class Woo_Fixed_Price_Coupons
 		 */
 		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-woo-fixed-price-coupons-exchange-gap.php';
 
+		/**
+		 * manage any currency exchange
+		 */
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-woo-fixed-price-coupons-exchange.php';
+
 		$this->loader = new Woo_Fixed_Price_Coupons_Loader();
 	}
 
@@ -168,7 +173,14 @@ class Woo_Fixed_Price_Coupons
 
 		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_styles');
 		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
-	}
+
+		/**
+		 * add exchange rate gap to any product price
+		 */
+		// Simple, grouped and external products
+		$this->loader->add_filter('woocommerce_product_get_price', $plugin_admin, 'add_gap');
+		$this->loader->add_filter('woocommerce_product_get_regular_price', $plugin_admin, 'add_gap');
+	} // taken from https://stackoverflow.com/questions/45806249/change-product-prices-via-a-hook-in-woocommerce-3
 
 	/**
 	 * Register all of the hooks related to the public-facing functionality
@@ -216,6 +228,14 @@ class Woo_Fixed_Price_Coupons
 		 * delete the hidden coupon from DB, when it is un-applied
 		 */
 		$this->loader->add_action("woocommerce_removed_coupon", $plugin_public, 'delete_hidden_coupon_by_code');
+
+		//round cart total up to nearest amount
+		$this->loader->add_filter('woocommerce_calculated_total', $plugin_public, 'round_total');
+
+		/**
+		 * restore the hidden coupon amount by pre-set custom amount, in the current currency
+		 */
+		// $this->loader->add_action('woocommerce_before_checkout_form', $plugin_public, 'restore_hidd_coup_amount');
 
 		/**
 		 * get coupon main-value (in desired currency)
