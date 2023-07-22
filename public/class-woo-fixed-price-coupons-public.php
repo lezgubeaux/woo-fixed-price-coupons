@@ -134,7 +134,8 @@ class Woo_Fixed_Price_Coupons_Public
 		WC()->cart->remove_coupon($coupon_code);
 		ve_debug_log("Step 0.1 = The originally saved coupon is de-applied! ", "coup");
 
-		$price_curr = WC()->cart->total;
+		global $woocommerce;
+		$price_curr = $woocommerce->cart->total;
 		ve_debug_log("Total after ctandard coupon de-applied: " . $price_curr . " amount_main: " . $c->meta[0], "coup");
 		$coupon_id = $c->get_id();
 
@@ -293,6 +294,7 @@ class Woo_Fixed_Price_Coupons_Public
 	 */
 	public function define_coupon_meta($currency_curr, $amount_main, $currency_main, $vals)
 	{
+		global $woocommerce;
 		$price_curr = WC()->cart->total;
 		ve_debug_log("Process current price/currency " . $price_curr . " " . $currency_curr, "coupon_metaCoup");
 
@@ -310,20 +312,21 @@ class Woo_Fixed_Price_Coupons_Public
 				if ($curr_indx == $currency_main) {
 					if ($currency_main == $currency_curr) {
 
-						$amount = $price_curr - $amount_main;
+						$amount = $this->calc_discount($price_curr, $amount_main);
 					} else {
 
 						$price_main = $this->exchange->exchange($price_curr, $currency_curr, $currency_main);
 
-						$amount = $price_main - $amount_main;
+						$amount = $this->calc_discount($price_main, $amount_main);
 					}
 				} else {
 
 					$price_indx = $this->exchange->exchange($price_curr, $currency_curr, $curr_indx);
 					$amount_indx = $this->exchange->exchange($amount_main, $currency_main, $curr_indx);
 					// convert the discount
-					$amount = $price_indx - $amount_indx;
+					$amount = $this->calc_discount($price_indx, $amount_indx);
 				}
+
 				$vals[$curr_indx]['coupon_amount'] = $amount;
 			}
 
@@ -356,6 +359,21 @@ class Woo_Fixed_Price_Coupons_Public
 
 		// returns complete array that defines all Multicurrency values of a coupon
 		return $vals;
+	}
+
+	/**
+	 * Make coupon of the value that will result with the desired fixed price.
+	 * Make result with ZERO discount, in cases where the total is smaller than the coupon
+	 */
+	public function calc_discount($price, $amount)
+	{
+		if ($price < $amount) {
+			$amount = $price;
+		} else {
+			$amount = $price - $amount;
+		}
+
+		return $amount;
 	}
 
 	/**

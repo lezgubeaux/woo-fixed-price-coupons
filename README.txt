@@ -67,6 +67,12 @@ directory take precedence. For example, `/assets/screenshot-1.png` would win ove
 
 == Changelog ==
 
+= 1.3.5~ =
+Take discount price in calculation
+Level the total to 0 if it goes to negative number
+
+fix the (already started) dynamic list of activate currencies
+
 = 1.3.4 =
 Adding exchange currency gap via php array (temporary solution, for testing only).
 
