@@ -62,9 +62,9 @@ if (!in_array('woocommerce/woocommerce.php', $plugins)) {
 }
 // check which currency exchange plugin is active
 if (in_array('woocommerce-aelia-currencyswitcher/woocommerce-aelia-currencyswitcher.php', $plugins)) {
-	define('CURRENCY_EXCH', 'woocommerce-aelia-currencyswitcher');
+	define('CURRENCY_EXCH', 'Aelia');
 } else if (in_array('woocommerce-multilingual/wpml-woocommerce.php', $plugins)) {
-	define('CURRENCY_EXCH', 'woocommerce-multilingual');
+	define('CURRENCY_EXCH', 'WPML');
 } else {
 	define('CURRENCY_EXCH', '');
 }

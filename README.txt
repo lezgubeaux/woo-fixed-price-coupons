@@ -67,11 +67,16 @@ directory take precedence. For example, `/assets/screenshot-1.png` would win ove
 
 == Changelog ==
 
-= 1.3.5~ =
-Take discount price in calculation
-Level the total to 0 if it goes to negative number
+= 1.3.6~ =
+~Take discount price in calculation (work on the product total, not cart total = see functions!!!)
 
-fix the (already started) dynamic list of activate currencies
+~add WPML Multicurrency dynamic list of activate currencies
+dynamic list of activate currencies of Aelia - already added
+
+Multicurrency Metadata and Metaboxes added to edit coupon page.
+
+= 1.3.5 =
+Level the total to 0 if it goes to negative number
 
 = 1.3.4 =
 Adding exchange currency gap via php array (temporary solution, for testing only).

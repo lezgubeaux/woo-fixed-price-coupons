@@ -54,7 +54,7 @@ class Woo_Fixed_Price_Coupons_Exchange
         ve_debug_log("2++++ amount_main_orig to be exch: " . $amount, "coup");
         $gap = new Woo_Fixed_Price_Coupons_ExchangeGap;
 
-        if (CURRENCY_EXCH == 'woocommerce-aelia-currencyswitcher') {
+        if (CURRENCY_EXCH == 'Aelia') {
 
             if ($to == 'EUR') {
 
@@ -94,7 +94,7 @@ class Woo_Fixed_Price_Coupons_Exchange
             ve_debug_log("...with gap " . $val, "coup");
 
             return $val;
-        } else if (CURRENCY_EXCH == 'woocommerce-multilingual') {
+        } else if (CURRENCY_EXCH == 'WPML') {
             // woocommerce-multilingual manages currency exchange rate
             $wcml = new WCML_Multi_Currency;
             $exch_rates = $wcml->get_exchange_rates();

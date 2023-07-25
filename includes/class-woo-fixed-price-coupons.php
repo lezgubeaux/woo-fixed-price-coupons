@@ -139,6 +139,11 @@ class Woo_Fixed_Price_Coupons
 		 */
 		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-woo-fixed-price-coupons-exchange.php';
 
+		/** 
+		 * multicurrency amounts of coupons
+		 */
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-woo-fixed-price-coupons-multicurrency-amounts.php';
+
 		$this->loader = new Woo_Fixed_Price_Coupons_Loader();
 	}
 
@@ -180,7 +185,23 @@ class Woo_Fixed_Price_Coupons
 		// Simple, grouped and external products
 		$this->loader->add_filter('woocommerce_product_get_price', $plugin_admin, 'add_gap');
 		$this->loader->add_filter('woocommerce_product_get_regular_price', $plugin_admin, 'add_gap');
-	} // taken from https://stackoverflow.com/questions/45806249/change-product-prices-via-a-hook-in-woocommerce-3
+		// taken from https://stackoverflow.com/questions/45806249/change-product-prices-via-a-hook-in-woocommerce-3
+
+		/** 
+		 * define metadata for Multicurrency amounts of a coupon - IF Aelia Currency Switcher is not present
+		 */
+		if (CURRENCY_EXCH == 'WPML') { // is_WPML
+
+			// define metadata for multicurrency
+			$this->loader->add_filter('publish_post', $plugin_admin, 'set_multicurrency_metadata');
+
+			// set metaboxes
+			$this->loader->add_action('add_meta_boxes', $plugin_admin, 'set_multicurrency_metaboxes');
+
+			// save custom fields data (when the post is saved)
+			$this->loader->add_action('save_post', $plugin_admin, 'save_multicurrency_metaboxes');
+		}
+	}
 
 	/**
 	 * Register all of the hooks related to the public-facing functionality

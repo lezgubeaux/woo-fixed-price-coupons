@@ -42,6 +42,12 @@ class Woo_Fixed_Price_Coupons_Admin
 	private $version;
 
 	/**
+	 * 
+	 */
+	public $enabled_curr;
+	public $curr;
+
+	/**
 	 * Initialize the class and set its properties.
 	 *
 	 * @since    1.0.0
@@ -56,6 +62,10 @@ class Woo_Fixed_Price_Coupons_Admin
 
 		add_action('admin_menu', array($this, 'addPluginAdminMenu'), 9);
 		add_action('admin_init', array($this, 'registerAndBuildFields'));
+
+		// get all enabled currencies
+		$curr = new Woo_Fixed_Price_Coupons_ExchangeGap;
+		$this->enabled_curr = $curr->currency;
 	}
 
 	/**
@@ -312,6 +322,74 @@ class Woo_Fixed_Price_Coupons_Admin
 			$res = $gap->apply_gap($price, $currency_curr);
 
 			return $res;
+		}
+	}
+
+	/** 
+	 * define metadata for Multicurrency amounts of a coupon
+	 */
+	public function set_multicurrency_metadata($post_id, $post)
+	{
+		// Add custom fields to the 'shop_coupon' post type during initialization
+		$multi_meta = new Woo_Fixed_Price_Coupons_Multicurrency_Amounts($post_id, $post);
+		$multi_meta->add_multicurrency_meta_fields();
+
+		// Save custom field data when the post is saved
+
+
+	}
+
+	/** 
+	 * define multicurrency metaboxes
+	 */
+	public function set_multicurrency_metaboxes()
+	{
+		$enabled_curr = $this->enabled_curr;
+
+		// add multi curr field per each curr
+		foreach ($enabled_curr as $curr) {
+			add_meta_box(
+				'shop_coupon_multicurrency_' . $curr, // Unique ID for the meta box
+				$curr, // Title of the meta box
+				'render_shop_coupon_multicurrency', // Callback function to render the meta box content
+				'shop_coupon', // Post type to display the meta box
+				'normal', // Position of the meta box ('normal', 'advanced', or 'side')
+				'default' // Priority ('default', 'high', 'low', or 'core')
+			);
+		}
+	}
+
+	// Callback function to render the meta box content
+	function render_shop_coupon_multicurrency($post)
+	{
+		// Retrieve the current author value if it exists
+		$shop_coupon_multicurrency_amount = get_post_meta($post->ID, 'shop_coupon_multicurrency_' . $this->curr, true);
+
+		// Output the input field for the author
+?>
+		<label for="shop_coupon_multicurrency_amount_<?= $this->curr; ?>">
+			<?= $this->curr; ?>
+		</label>
+		<input type="number" id="shop_coupon_multicurrency_amount_<?= $this->curr; ?>" name="shop_coupon_multicurrency_amount_<?= $this->curr; ?>" value="<?php echo esc_attr($shop_coupon_multicurrency_amount); ?>" />
+<?php
+	}
+
+	/**
+	 * save custom fields data (when the post is saved)
+	 */
+	public function save_multicurrency_metaboxes($post_id)
+	{
+		$enabled_curr = $this->enabled_curr;
+
+		// save multi curr field value per each curr
+		foreach ($enabled_curr as $curr) {
+			if (array_key_exists('shop_coupon_multicurrency_amount_' . $curr, $_POST)) {
+				update_post_meta(
+					$post_id,
+					'shop_coupon_multicurrency_' . $curr,
+					sanitize_text_field($_POST['shop_coupon_multicurrency_amount_' . $curr])
+				);
+			}
 		}
 	}
 }

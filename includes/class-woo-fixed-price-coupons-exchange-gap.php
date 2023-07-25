@@ -87,21 +87,25 @@ class Woo_Fixed_Price_Coupons_ExchangeGap
      */
     public function active_woo_currencies()
     {
-        // get all WOO currencies
-        $all_curr = get_woocommerce_currencies();
+        if (CURRENCY_EXCH == 'Aelia') {
+            if (class_exists('Aelia\WC\CurrencySwitcher\WC_Aelia_CurrencySwitcher')) {
 
-        $active_curr = ['EUR']; // base currency - other are added below
-
-        /* temporarily disabled
-        // get all active Woo currencies -> $currency
-        foreach ($all_curr as $code => $curr) {
-            $res = apply_filters('wc_aelia_cs_convert', 9999, $code, 'EUR');
-
-            if ($res != 9999) {
-                $active_curr[] = $code;
+                $currency_switcher = Aelia\WC\CurrencySwitcher\WC_Aelia_CurrencySwitcher::settings();
+                $enabled_currencies = $currency_switcher->get_enabled_currencies();
+            } else {
+                ve_debug_log("ERROR! Aelia Currency Switcher is either missing, or it's newer version uses different classes.", "error_coupon");
             }
-        } */
-        $active_curr = ['EUR', 'AUD', 'CAD', 'GBP', 'USD', 'ZAR'];
+        } else if (CURRENCY_EXCH == 'WPML') {
+            // woocommerce-multilingual manages currency exchange rate
+
+            ve_debug_log("ERROR!!! Enabled currencies not found for WPML Multicurrency. Check the plugin code", "error_coupon");
+
+            $enabled_currencies = '';
+        }
+
+        $active_curr = array_merge(['EUR'], $enabled_currencies);
+
+        ve_debug_log("All enabled currencies: " . print_r($active_curr, true), "coup");
 
         $this->currency = $active_curr;
 

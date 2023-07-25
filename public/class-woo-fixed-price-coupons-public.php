@@ -134,8 +134,7 @@ class Woo_Fixed_Price_Coupons_Public
 		WC()->cart->remove_coupon($coupon_code);
 		ve_debug_log("Step 0.1 = The originally saved coupon is de-applied! ", "coup");
 
-		global $woocommerce;
-		$price_curr = $woocommerce->cart->total;
+		$price_curr = WC()->cart->get_cart_subtotal();
 		ve_debug_log("Total after ctandard coupon de-applied: " . $price_curr . " amount_main: " . $c->meta[0], "coup");
 		$coupon_id = $c->get_id();
 
@@ -214,7 +213,16 @@ class Woo_Fixed_Price_Coupons_Public
 				$vals = $meta_value;
 				ve_debug_log("for key: " . $meta_key . " meta_value: " . print_r($vals, true), "coup");
 
-				if ($meta_key == '_coupon_currency_data') {
+				// which currency switch plugin is active
+				if (CURRENCY_EXCH == 'Aelia') {
+					$meta_currency_key = '_coupon_currency_data';
+				} elseif (CURRENCY_EXCH == 'WPML') {
+					$meta_currency_key = 'meta_currency_key';
+				} else {
+					ve_debug_log("WARNING!!! No acceptable Multicurrency plugin found! ", "error_coupon");
+				}
+
+				if ($meta_key == $meta_currency_key) { // manage only the metadata of multicurrency values
 
 					$vals = unserialize($meta_value);
 
@@ -294,67 +302,38 @@ class Woo_Fixed_Price_Coupons_Public
 	 */
 	public function define_coupon_meta($currency_curr, $amount_main, $currency_main, $vals)
 	{
-		global $woocommerce;
-		$price_curr = WC()->cart->total;
+		$price_curr = WC()->cart->get_cart_subtotal();
 		ve_debug_log("Process current price/currency " . $price_curr . " " . $currency_curr, "coupon_metaCoup");
 
-		// which currency switch plugin is active
-		if (CURRENCY_EXCH == 'woocommerce-aelia-currencyswitcher') { // is_aliea
+		$vals = '';
+		// prepend EUR values to multicurrency values in metadata of coupon
+		$val_eur['EUR'] = array(
+			'coupon_amount' => ''
+		);
+		$res = array_merge($val_eur, $vals);
+		$vals = $res;
 
-			// prepend EUR values to multicurrency values in metadata of coupon
-			$val_eur['EUR'] = array(
-				'coupon_amount' => ''
-			);
-			$res = array_merge($val_eur, $vals);
-			$vals = $res;
+		// process the original metadata into new amounts
+		foreach ($vals as $curr_indx => $val) {
+			if ($curr_indx == $currency_main) {
+				if ($currency_main == $currency_curr) {
 
-			foreach ($vals as $curr_indx => $val) {
-				if ($curr_indx == $currency_main) {
-					if ($currency_main == $currency_curr) {
-
-						$amount = $this->calc_discount($price_curr, $amount_main);
-					} else {
-
-						$price_main = $this->exchange->exchange($price_curr, $currency_curr, $currency_main);
-
-						$amount = $this->calc_discount($price_main, $amount_main);
-					}
+					$amount = $this->calc_discount($price_curr, $amount_main);
 				} else {
 
-					$price_indx = $this->exchange->exchange($price_curr, $currency_curr, $curr_indx);
-					$amount_indx = $this->exchange->exchange($amount_main, $currency_main, $curr_indx);
-					// convert the discount
-					$amount = $this->calc_discount($price_indx, $amount_indx);
+					$price_main = $this->exchange->exchange($price_curr, $currency_curr, $currency_main);
+
+					$amount = $this->calc_discount($price_main, $amount_main);
 				}
-
-				$vals[$curr_indx]['coupon_amount'] = $amount;
-			}
-
-			/* // add EUR to multicurrencies
-
-			if ($currency_main == $currency_curr) {
-
-				$amount = $price_curr - $amount_main;
 			} else {
 
-				$price_main = $this->exchange->exchange($price_curr, $currency_curr, $currency_main);
-
-				$amount = $price_main - $amount_main;
+				$price_indx = $this->exchange->exchange($price_curr, $currency_curr, $curr_indx);
+				$amount_indx = $this->exchange->exchange($amount_main, $currency_main, $curr_indx);
+				// convert the discount
+				$amount = $this->calc_discount($price_indx, $amount_indx);
 			}
 
-			$amount = $amount_main;
-			if ($currency_main != 'EUR') {
-				$amount = $this->exchange->exchange($amount_main, $currency_main, 'EUR');
-			}
-			$val_eur['EUR'] = array(
-				'coupon_amount' => $amount,
-				'minimum_amount' => '',
-				'maximum_amount' => ''
-			);
-			$res = array_merge($val_eur, $vals);
-			$vals = $res; */
-		} else { // is_WPML
-
+			$vals[$curr_indx]['coupon_amount'] = $amount;
 		}
 
 		// returns complete array that defines all Multicurrency values of a coupon
