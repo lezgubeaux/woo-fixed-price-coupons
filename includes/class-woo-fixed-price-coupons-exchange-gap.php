@@ -105,7 +105,7 @@ class Woo_Fixed_Price_Coupons_ExchangeGap
 
         $active_curr = array_merge(['EUR'], $enabled_currencies);
 
-        ve_debug_log("All enabled currencies: " . print_r($active_curr, true), "coup");
+        ve_debug_log("All enabled currencies: " . print_r($active_curr, true), "coup_exch");
 
         $this->currency = $active_curr;
 

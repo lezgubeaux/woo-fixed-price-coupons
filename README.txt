@@ -67,11 +67,14 @@ directory take precedence. For example, `/assets/screenshot-1.png` would win ove
 
 == Changelog ==
 
-= 1.3.6~ =
-~Take discount price in calculation (work on the product total, not cart total = see functions!!!)
-
+= 1.3.8~ =
 ~add WPML Multicurrency dynamic list of activate currencies
 dynamic list of activate currencies of Aelia - already added
+
+= 1.3.7 =
+Take discount price in calculation (work on the product total, not cart total = see functions!!!)
+
+= 1.3.6 =
 
 Multicurrency Metadata and Metaboxes added to edit coupon page.
 
