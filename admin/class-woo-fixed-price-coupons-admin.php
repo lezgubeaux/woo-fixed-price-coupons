@@ -210,6 +210,13 @@ class Woo_Fixed_Price_Coupons_Admin
 		$exch_gap = new Woo_Fixed_Price_Coupons_ExchangeGap;
 		$curr = $exch_gap->currency;
 
+		if (!is_array($curr)) {
+
+			ve_debug_log("ERROR!!! Enabled currencies not found. Check the plugin code", "error_coupon");
+
+			wp_die();
+		}
+
 		foreach ($curr as $code) {
 			$subtype = 'number';
 			if ($code == 'EUR') {
@@ -344,34 +351,41 @@ class Woo_Fixed_Price_Coupons_Admin
 	 */
 	public function set_multicurrency_metaboxes()
 	{
-		$enabled_curr = $this->enabled_curr;
 
-		// add multi curr field per each curr
-		foreach ($enabled_curr as $curr) {
-			add_meta_box(
-				'shop_coupon_multicurrency_' . $curr, // Unique ID for the meta box
-				$curr, // Title of the meta box
-				'render_shop_coupon_multicurrency', // Callback function to render the meta box content
-				'shop_coupon', // Post type to display the meta box
-				'normal', // Position of the meta box ('normal', 'advanced', or 'side')
-				'default' // Priority ('default', 'high', 'low', or 'core')
-			);
-		}
+		add_meta_box(
+			'shop_coupon_multicurrency', // Unique ID for the meta box
+			'Multicurrency', // Title of the meta box
+			array($this, 'render_shop_coupon_multicurrency'), // Callback function to render the meta box content
+			'shop_coupon', // Post type to display the meta box
+			'normal', // Position of the meta box ('normal', 'advanced', or 'side')
+			'default' // Priority ('default', 'high', 'low', or 'core')
+		);
 	}
 
 	// Callback function to render the meta box content
-	function render_shop_coupon_multicurrency($post)
+	public function render_shop_coupon_multicurrency($post)
 	{
-		// Retrieve the current author value if it exists
-		$shop_coupon_multicurrency_amount = get_post_meta($post->ID, 'shop_coupon_multicurrency_' . $this->curr, true);
+		$enabled_curr = $this->enabled_curr;
+		print_r($enabled_curr, true);
 
-		// Output the input field for the author
+		// add multi curr field per each curr
+		foreach ($enabled_curr as $curr) {
+
+			if ($curr != 'EUR') { // EUR value is not multicurr but native coupon amount
+				// Retrieve the current author value if it exists
+				$shop_coupon_multicurrency_amount = get_post_meta($post->ID, 'shop_coupon_multicurrency_amount_' . $curr, true);
+
+				// Output the input field for the author
 ?>
-		<label for="shop_coupon_multicurrency_amount_<?= $this->curr; ?>">
-			<?= $this->curr; ?>
-		</label>
-		<input type="number" id="shop_coupon_multicurrency_amount_<?= $this->curr; ?>" name="shop_coupon_multicurrency_amount_<?= $this->curr; ?>" value="<?php echo esc_attr($shop_coupon_multicurrency_amount); ?>" />
+				<div class="multi_coup_val">
+					<label for="shop_coupon_multicurrency_amount_<?= $curr; ?>">
+						<?= $curr; ?>
+					</label>
+					<input type="number" id="shop_coupon_multicurrency_amount_<?= $curr; ?>" name="shop_coupon_multicurrency_amount_<?= $curr; ?>" value="<?php echo esc_attr($shop_coupon_multicurrency_amount); ?>" />
+				</div>
 <?php
+			}
+		}
 	}
 
 	/**
@@ -386,7 +400,7 @@ class Woo_Fixed_Price_Coupons_Admin
 			if (array_key_exists('shop_coupon_multicurrency_amount_' . $curr, $_POST)) {
 				update_post_meta(
 					$post_id,
-					'shop_coupon_multicurrency_' . $curr,
+					'shop_coupon_multicurrency_amount_' . $curr,
 					sanitize_text_field($_POST['shop_coupon_multicurrency_amount_' . $curr])
 				);
 			}

@@ -5,3 +5,8 @@
  .form-table th{
     width: 50px;
  }
+ .multi_coup_val{
+   display: inline-block;
+   max-width: 190px;
+   padding-bottom: 20px;
+ }

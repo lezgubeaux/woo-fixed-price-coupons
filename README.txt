@@ -67,9 +67,15 @@ directory take precedence. For example, `/assets/screenshot-1.png` would win ove
 
 == Changelog ==
 
-= 1.3.8~ =
-~add WPML Multicurrency dynamic list of activate currencies
+= 1.3.9~ =
+~apply WPML exchange rate, our custom exchange gaps, and custom multicurrency values of a coupon - to all already developed coupon management processes
+
+= 1.3.8 =
+add custom multicurrency values of a coupon
+add WPML Multicurrency dynamic list of activate currencies
 dynamic list of activate currencies of Aelia - already added
+
+custom gap system completed
 
 = 1.3.7 =
 Take discount price in calculation (work on the product total, not cart total = see functions!!!)

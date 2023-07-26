@@ -75,8 +75,13 @@ class Woo_Fixed_Price_Coupons_ExchangeGap
      */
     public function get_gaps()
     {
-        // get from saved options woo_fpc_gap_COD(e)
+        if (!is_array($this->currency)) {
 
+            ve_debug_log("ERROR!!! Enabled currencies not found. Check the plugin code", "error_coupon");
+
+            wp_die();
+        }
+        // get from saved options woo_fpc_gap_COD(e)
         foreach ($this->currency as $val) {
             $this->gap[$val] = get_option('woo_fpc_gap_' . $val, 0);
         }
@@ -95,15 +100,30 @@ class Woo_Fixed_Price_Coupons_ExchangeGap
             } else {
                 ve_debug_log("ERROR! Aelia Currency Switcher is either missing, or it's newer version uses different classes.", "error_coupon");
             }
+
+            // add EUR on top
+            $active_curr = array_merge(['EUR'], $enabled_currencies);
         } else if (CURRENCY_EXCH == 'WPML') {
+
+            ve_debug_log("PLUGIN " . CURRENCY_EXCH, "coup_exch");
+
             // woocommerce-multilingual manages currency exchange rate
+            $wcml_settings = get_option('_wcml_settings');
+            ve_debug_log("wcml sett " . print_r($wcml_settings, true), "coup_exch");
 
-            ve_debug_log("ERROR!!! Enabled currencies not found for WPML Multicurrency. Check the plugin code", "error_coupon");
+            $active_curr = $wcml_settings['currencies_order'];
+        } else {
+            $active_curr = ['XXX'];
 
-            $enabled_currencies = '';
+            ve_debug_log("No acceptable Multicurrency plugin found", "error_coupon");
         }
 
-        $active_curr = array_merge(['EUR'], $enabled_currencies);
+        /* if (!is_array($enabled_currencies)) {
+
+            ve_debug_log("ERROR!!! Enabled currencies not found. Check the plugin code" . print_r($enabled_currencies, true), "error_coupon");
+
+            wp_die();
+        } */
 
         ve_debug_log("All enabled currencies: " . print_r($active_curr, true), "coup_exch");
 
