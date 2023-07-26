@@ -77,6 +77,8 @@ dynamic list of activate currencies of Aelia - already added
 
 custom gap system completed
 
+Coupons now work together with the custom discount system (previously developed by the team)
+
 = 1.3.7 =
 Take discount price in calculation (work on the product total, not cart total = see functions!!!)
 
