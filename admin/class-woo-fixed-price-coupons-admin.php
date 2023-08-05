@@ -323,7 +323,7 @@ class Woo_Fixed_Price_Coupons_Admin
 		if ($currency_curr == 'EUR') {
 			return $price;
 		} else {
-			ve_debug_log("### adding gap to product price", "gap_coupon");
+			ve_debug_log("adding gap to product price", "coup");
 
 			$gap = new Woo_Fixed_Price_Coupons_ExchangeGap;
 			$res = $gap->apply_gap($price, $currency_curr);
@@ -366,24 +366,45 @@ class Woo_Fixed_Price_Coupons_Admin
 	public function render_shop_coupon_multicurrency($post)
 	{
 		$enabled_curr = $this->enabled_curr;
-		print_r($enabled_curr, true);
+
+		ve_debug_log("Enabled curr " . print_r($enabled_curr, true), "coupon_meta");
+
+		$multicurrency = array();
+		// set metadata currencies array
+		$shop_coupon_multicurrency_amount = array();
+		foreach ($enabled_curr as $curr) {
+			$multicurrency[$curr]['coupon_amount'] = '';
+		}
+
+		$shop_coupon_multicurrency_amount = get_post_meta($post->ID, 'shop_coupon_multicurrency', true);
+
+		ve_debug_log("First time vals: " . print_r($shop_coupon_multicurrency_amount, true), "coupon_meta");
+
+		// if no metadata saved yet, set empty elements, to create form inputs
+		if (!is_array($shop_coupon_multicurrency_amount) || empty($shop_coupon_multicurrency_amount)) {
+			$shop_coupon_multicurrency_amount = $multicurrency;
+		}
+
+		ve_debug_log("Grabbed Multicurr amounts " . print_r($shop_coupon_multicurrency_amount, true), "coupon_meta");
 
 		// add multi curr field per each curr
 		foreach ($enabled_curr as $curr) {
 
 			if ($curr != 'EUR') { // EUR value is not multicurr but native coupon amount
-				// Retrieve the current author value if it exists
-				$shop_coupon_multicurrency_amount = get_post_meta($post->ID, 'shop_coupon_multicurrency_amount_' . $curr, true);
+				// Retrieve the current value if it exists
 
-				// Output the input field for the author
+				// $shop_coupon_multicurrency_amount[$curr, true];
+				if (array_key_exists($curr, $shop_coupon_multicurrency_amount)) {
+					// Output the input field for a Multicurrency value
 ?>
-				<div class="multi_coup_val">
-					<label for="shop_coupon_multicurrency_amount_<?= $curr; ?>">
-						<?= $curr; ?>
-					</label>
-					<input type="number" id="shop_coupon_multicurrency_amount_<?= $curr; ?>" name="shop_coupon_multicurrency_amount_<?= $curr; ?>" value="<?php echo esc_attr($shop_coupon_multicurrency_amount); ?>" />
-				</div>
+					<div class="multi_coup_val">
+						<label for="shop_coupon_multicurrency_amount_<?= $curr; ?>">
+							<?= $curr; ?>
+						</label>
+						<input type="number" id="shop_coupon_multicurrency_amount_<?= $curr; ?>" name="shop_coupon_multicurrency_amount_<?= $curr; ?>" value="<?php echo esc_attr($shop_coupon_multicurrency_amount[$curr]['coupon_amount']); ?>" />
+					</div>
 <?php
+				}
 			}
 		}
 	}
@@ -395,15 +416,21 @@ class Woo_Fixed_Price_Coupons_Admin
 	{
 		$enabled_curr = $this->enabled_curr;
 
+		$metadata = array();
 		// save multi curr field value per each curr
 		foreach ($enabled_curr as $curr) {
-			if (array_key_exists('shop_coupon_multicurrency_amount_' . $curr, $_POST)) {
-				update_post_meta(
-					$post_id,
-					'shop_coupon_multicurrency_amount_' . $curr,
-					sanitize_text_field($_POST['shop_coupon_multicurrency_amount_' . $curr])
-				);
+
+			$key = 'shop_coupon_multicurrency_amount_' . $curr;
+			if (array_key_exists($key, $_POST)) {
+				$metadata[$curr]['coupon_amount'] = $_POST[$key];
 			}
 		}
+		ve_debug_log(print_r($_POST) . " Collected multicurrency for the coupon: " . print_r($metadata, true), "coupon_meta");
+
+		update_post_meta(
+			$post_id,
+			'shop_coupon_multicurrency',
+			$metadata
+		);
 	}
 }

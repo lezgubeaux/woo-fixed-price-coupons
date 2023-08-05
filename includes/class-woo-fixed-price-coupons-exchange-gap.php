@@ -61,11 +61,11 @@ class Woo_Fixed_Price_Coupons_ExchangeGap
             return false;
         }
 
-        ve_debug_log("gap in: " . $amount . " of " . $curr, "gap_coupon");
+        ve_debug_log("gap in: " . $amount . " of " . $curr . " (" . $this->gap[$curr] . " " . $do_gap . ")", "coup");
 
         // increase the value by the particular currency gap
-        $value = $amount * (1 + $this->gap[$curr] * $do_gap);
-        ve_debug_log("gap out: " . $value . " of " . $curr, "gap_coupon");
+        $value = $amount * ($this->gap[$curr] + 1) ** $do_gap;
+        // ve_debug_log($this->gap[$curr] . " gap out: " . $value . " of " . $curr, "coup");
 
         return round($value, 2);
     }
@@ -105,11 +105,8 @@ class Woo_Fixed_Price_Coupons_ExchangeGap
             $active_curr = array_merge(['EUR'], $enabled_currencies);
         } else if (CURRENCY_EXCH == 'WPML') {
 
-            ve_debug_log("PLUGIN " . CURRENCY_EXCH, "coup_exch");
-
             // woocommerce-multilingual manages currency exchange rate
             $wcml_settings = get_option('_wcml_settings');
-            ve_debug_log("wcml sett " . print_r($wcml_settings, true), "coup_exch");
 
             $active_curr = $wcml_settings['currencies_order'];
         } else {
@@ -117,15 +114,6 @@ class Woo_Fixed_Price_Coupons_ExchangeGap
 
             ve_debug_log("No acceptable Multicurrency plugin found", "error_coupon");
         }
-
-        /* if (!is_array($enabled_currencies)) {
-
-            ve_debug_log("ERROR!!! Enabled currencies not found. Check the plugin code" . print_r($enabled_currencies, true), "error_coupon");
-
-            wp_die();
-        } */
-
-        ve_debug_log("All enabled currencies: " . print_r($active_curr, true), "coup_exch");
 
         $this->currency = $active_curr;
 

@@ -38,10 +38,22 @@ class Woo_Fixed_Price_Coupons_CouponMeta extends WC_Coupon
     {
 
         parent::__construct($coupon_code); // get native coupon class
-        $this->meta = ['', ''];
-        if (isset($this->meta_data[0])) {
 
-            $this->meta_all = $this->meta_data[0]->get_data("current_data");
+        // which currency switch plugin is active
+        if (CURRENCY_EXCH == 'Aelia') {
+            $meta_currency_key = '_coupon_currency_data';
+        } elseif (CURRENCY_EXCH == 'WPML') {
+            $meta_currency_key = 'shop_coupon_multicurrency';
+        } else {
+            ve_debug_log("WARNING!!! No acceptable Multicurrency plugin found! ", "error_coupon");
+        }
+
+        $this->meta = ['', ''];
+        foreach ($this->meta_data as $key => $meta_orig) {
+
+            ve_debug_log("Metadata found: " . $key . " / " . print_r($meta_orig, true), "coupon_meta");
+
+            $this->meta_all = $meta_orig->get_data("current_data");
 
             $id = $this->meta_all['id'];
 
@@ -55,10 +67,10 @@ class Woo_Fixed_Price_Coupons_CouponMeta extends WC_Coupon
         // if no multicurrency value found, this is EUR-only coupon
 
         if (is_array($vals)) {
-            // if any multicurrency value found, use it CODE as _main
+            // if any multicurrency value found, use its CODE as _main
             foreach ($vals as $key => $val) {
                 if ($val['coupon_amount']) {
-                    ve_debug_log("** " . $id . " k/v " . $key . " " . $val['coupon_amount'], "coupon_metaCoup");
+                    ve_debug_log("** " . $id . " key/val " . $key . " " . $val['coupon_amount'], "coupon_meta");
                     $this->meta[0] = $val['coupon_amount'];
                     $this->meta[1] = $key;
 
@@ -70,7 +82,7 @@ class Woo_Fixed_Price_Coupons_CouponMeta extends WC_Coupon
 
                 $coupon_amount = $this->data["amount"];
 
-                ve_debug_log("============ From couponMeta: id = " . $id . " coup: " . print_r($coupon_amount, true), "coupon_metaCoup");
+                ve_debug_log("============ From couponMeta: id = " . $id . " coup: " . print_r($coupon_amount, true), "coupon_meta");
 
                 $this->meta[0] = $coupon_amount;
                 $this->meta[1] = 'EUR';

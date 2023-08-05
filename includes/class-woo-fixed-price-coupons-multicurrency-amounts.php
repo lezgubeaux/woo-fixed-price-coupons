@@ -56,16 +56,23 @@ class Woo_Fixed_Price_Coupons_Multicurrency_Amounts
         // Check if coupon CPT
         if (is_admin() && $post_type === 'shop_coupon') {
 
-            $amount = 0;
-
             // add multi curr metadata per each curr
             $enabled_curr = $this->enabled_curr;
             ve_debug_log($enabled_curr, "multi_meta");
+
+            $metadata = array();
+
             foreach ($enabled_curr as $curr) {
 
-                // Add the custom field 'shop_coupon_multicurrency' to the 'shop_coupon' post type
-                add_post_meta($post_id, 'shop_coupon_multicurrency_' . $curr, $amount, true);
+                $metadata[$curr] = '';
             }
+            // Add metadata 'shop_coupon_multicurrency' to the 'shop_coupon' post type
+            add_post_meta(
+                $post_id,
+                'shop_coupon_multicurrency',
+                $metadata,
+                true
+            );
         }
     }
 }

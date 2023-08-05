@@ -67,8 +67,14 @@ directory take precedence. For example, `/assets/screenshot-1.png` would win ove
 
 == Changelog ==
 
-= 1.3.9~ =
-~apply WPML exchange rate, our custom exchange gaps, and custom multicurrency values of a coupon - to all already developed coupon management processes
+= 1.4.0 =
+fix minor calculation glitches
+
+Original coupon code preserved as coupon_description.
+Unique code for temporary coupons brought back (for the cases where mulitple users use the same coupon simultaniously)
+
+= 1.3.9 =
+apply WPML exchange rate, our custom exchange gaps, and custom multicurrency values of a coupon - to all already developed coupon management processes
 
 = 1.3.8 =
 add custom multicurrency values of a coupon
