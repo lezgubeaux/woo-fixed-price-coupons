@@ -473,9 +473,29 @@ class Woo_Fixed_Price_Coupons_Public
 	}
 
 	//round cart total up to nearest amount
-	function round_total($total)
+	public function round_total($total)
 	{
 		$total = round($total, 2);
 		return intval(round($total));
+	}
+
+	// when non-base currency selected, and a coupon has a value for that currency,
+	// use multicurrency value of applied coupon 
+	// (this ensures round, fixed main amount of a coupon to be used)
+	public function use_multicurrency($cart_object)
+	{
+		foreach ($cart_object->get_cart() as $hash => $value) {
+
+			ve_debug_log("Cart: " . print_r($value, true), "cart");
+			
+			$user = wp_get_current_user(); // get current user
+			$name = $user->user_login;
+	
+			if ($name == 'vladimir@framework.tech') {
+	
+				$cart->set_coupon_discount_totals(100);
+	
+				ve_debug_log("cart " . print_r($cart, true), "cart");
+		}
 	}
 }

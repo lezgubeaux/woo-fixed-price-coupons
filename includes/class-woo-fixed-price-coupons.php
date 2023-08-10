@@ -253,6 +253,9 @@ class Woo_Fixed_Price_Coupons
 		//round cart total up to nearest amount
 		$this->loader->add_filter('woocommerce_calculated_total', $plugin_public, 'round_total');
 
+		// use multicurrency value of applied coupon
+		$this->loader->add_action('woocommerce_before_calculate_totals', $plugin_public, 'use_multicurrency');
+
 		/**
 		 * restore the hidden coupon amount by pre-set custom amount, in the current currency
 		 */
